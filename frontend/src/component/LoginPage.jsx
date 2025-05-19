@@ -5,6 +5,7 @@ const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
   // Sayfa düzenlemeleri için useEffect
   useEffect(() => {
@@ -18,36 +19,56 @@ const LoginPage = () => {
     document.body.style.margin = "0";
     document.body.style.padding = "0";
     document.body.style.overflow = "hidden";
+    document.body.style.backgroundColor = "#D71923"; // Arka plan rengini kırmızı yapıyoruz
     
-    // Zoom kontrolü için meta viewport etiketi ekleme
-    const meta = document.createElement('meta');
-    meta.name = 'viewport';
-    meta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
-    document.head.appendChild(meta);
+    // Pencere boyutunu izleme
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
     
     // Zoom engelleme için event listener
     const preventZoom = (e) => {
-      if (e.ctrlKey) {
+      if (e.ctrlKey || e.metaKey) {
         e.preventDefault();
       }
     };
     
+    // Pinch zoom engelleme
+    const preventPinchZoom = (e) => {
+      if (e.touches && e.touches.length > 1) {
+        e.preventDefault();
+      }
+    };
+    
+    // Event listener'ları ekle
+    window.addEventListener('resize', handleResize);
     document.addEventListener('wheel', preventZoom, { passive: false });
+    document.addEventListener('touchmove', preventPinchZoom, { passive: false });
     document.addEventListener('keydown', (e) => {
-      if ((e.ctrlKey || e.metaKey) && (e.key === '+' || e.key === '-' || e.key === '=')) {
+      if ((e.ctrlKey || e.metaKey) && (e.key === '+' || e.key === '-' || e.key === '=' || e.key === '0')) {
         e.preventDefault();
       }
     });
     
+    // Cleanup
     return () => {
+      window.removeEventListener('resize', handleResize);
       document.removeEventListener('wheel', preventZoom);
-      document.head.removeChild(meta);
+      document.removeEventListener('touchmove', preventPinchZoom);
+      document.removeEventListener('keydown', preventZoom);
     };
   }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log("Giriş yapılıyor:", { email, password });
+  };
+
+  // Responsive form genişliği
+  const getFormWidth = () => {
+    if (windowWidth <= 480) return '90%';
+    if (windowWidth <= 768) return '450px';
+    return '480px';
   };
 
   return (
@@ -61,14 +82,15 @@ const LoginPage = () => {
         height: "100%",
         display: "flex",
         flexDirection: "column",
-        justifyContent: "center",
+        justifyContent: "space-between",
         alignItems: "center",
         overflow: "hidden",
-        backgroundColor: "#FFFFFF",
-        transform: "scale(1)",
-        transformOrigin: "center center"
+        backgroundColor: "#D71923", // Kırmızı arka plan
+        touchAction: "none"
       }}
     >
+      {/* Logo alanı tamamen silindi */}
+      
       {/* Arka plan olarak SVG */}
       <div style={{
         position: "absolute",
@@ -77,55 +99,46 @@ const LoginPage = () => {
         right: 0,
         bottom: 0,
         backgroundImage: `url(${loginSvg})`,
-        backgroundPosition: "center",
+        backgroundPosition: "center bottom",
         backgroundRepeat: "no-repeat",
-        backgroundSize: "100% 100%",
-        zIndex: 1
+        backgroundSize: "cover",
+        backgroundAttachment: "fixed",
+        zIndex: 1,
+        opacity: 0.9
       }} />
-      
-      {/* Üst Logo */}
-      <div style={{
-        position: "absolute",
-        top: "40px",
-        textAlign: "center",
-        color: "white",
-        zIndex: 2
-      }}>
-      </div>
       
       {/* Login Form */}
       <div style={{
-        width: "400px",
-        maxWidth: "400px",
-        minWidth: "400px",
+        width: getFormWidth(),
         backgroundColor: "white",
-        borderRadius: "8px",
-        padding: "30px",
-        boxShadow: "0 5px 25px rgba(0, 0, 0, 0.15)",
+        borderRadius: "12px",
+        padding: windowWidth <= 480 ? "20px" : "30px", // Mobil için padding'i azalt
+        boxShadow: "0 8px 32px rgba(0, 0, 0, 0.2)",
         zIndex: 10,
-        position: "fixed",
-        top: "50%",
-        left: "50%",
-        transform: "translate(-50%, -50%) scale(1)",
-        margin: "0 auto",
         boxSizing: "border-box",
-        transformOrigin: "center center",
-        userSelect: "none"
+        touchAction: "none",
+        maxHeight: windowWidth <= 480 ? "90vh" : "auto",
+        overflowY: windowWidth <= 480 ? "auto" : "visible",
+        marginTop: windowWidth <= 480 ? "90px" : "130px"
       }}>
         <h2 style={{
           color: "#D71923",
           textAlign: "center",
           marginTop: 0,
-          marginBottom: "10px"
+          marginBottom: "10px",
+          fontSize: windowWidth <= 480 ? "22px" : "28px", // Mobil için font boyutunu ayarla
+          fontWeight: "600",
+          letterSpacing: "0.5px",
+          textShadow: "0 1px 2px rgba(0,0,0,0.05)"
         }}>Hoşgeldiniz!</h2>
         
         <p style={{
           textAlign: "center",
           color: "#808080",
-          fontSize: "14px",
-          marginBottom: "25px"
+          fontSize: windowWidth <= 480 ? "12px" : "14px", // Mobil için font boyutunu azalt
+          marginBottom: windowWidth <= 480 ? "15px" : "25px"
         }}>
-          Hesabınız yok mu? <a href="#" style={{
+          Hesabınız yok mu? <a href="/register" style={{
             color: "#D71923",
             textDecoration: "none",
             fontWeight: "bold"
@@ -133,11 +146,11 @@ const LoginPage = () => {
         </p>
         
         <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: "20px" }}>
+          <div style={{ marginBottom: windowWidth <= 480 ? "15px" : "20px" }}>
             <label style={{
               display: "block",
               marginBottom: "8px",
-              fontSize: "14px",
+              fontSize: windowWidth <= 480 ? "12px" : "14px", // Mobil için font boyutunu azalt
               color: "#D71923",
               fontWeight: "500"
             }}>
@@ -150,10 +163,10 @@ const LoginPage = () => {
               placeholder="samedbayrak@dubaivizeal.com"
               style={{
                 width: "100%",
-                padding: "12px 15px",
+                padding: windowWidth <= 480 ? "10px 12px" : "12px 15px", // Mobil için padding'i azalt
                 border: "1px solid #ddd",
                 borderRadius: "5px",
-                fontSize: "14px",
+                fontSize: windowWidth <= 480 ? "12px" : "14px", // Mobil için font boyutunu azalt
                 boxSizing: "border-box",
                 backgroundColor: "#f9f9f9",
                 color: "#333333"
@@ -162,7 +175,7 @@ const LoginPage = () => {
             />
           </div>
           
-          <div style={{ marginBottom: "25px" }}>
+          <div style={{ marginBottom: windowWidth <= 480 ? "20px" : "25px" }}>
             <div style={{
               display: "flex",
               justifyContent: "space-between",
@@ -170,14 +183,14 @@ const LoginPage = () => {
               marginBottom: "8px"
             }}>
               <label style={{
-                fontSize: "14px",
+                fontSize: windowWidth <= 480 ? "12px" : "14px", // Mobil için font boyutunu azalt
                 color: "#D71923",
                 fontWeight: "500"
               }}>
                 Parola
               </label>
               <a href="#" style={{
-                fontSize: "12px",
+                fontSize: windowWidth <= 480 ? "10px" : "12px", // Mobil için font boyutunu azalt
                 color: "#808080",
                 textDecoration: "none"
               }}>
@@ -193,11 +206,11 @@ const LoginPage = () => {
                 placeholder="••••••••"
                 style={{
                   width: "100%",
-                  padding: "12px 15px",
+                  padding: windowWidth <= 480 ? "10px 12px" : "12px 15px", // Mobil için padding'i azalt
                   paddingRight: "40px",
                   border: "1px solid #ddd",
                   borderRadius: "5px",
-                  fontSize: "14px",
+                  fontSize: windowWidth <= 480 ? "12px" : "14px", // Mobil için font boyutunu azalt
                   boxSizing: "border-box",
                   backgroundColor: "#f9f9f9",
                   color: "#333333"
@@ -221,11 +234,11 @@ const LoginPage = () => {
                 }}
               >
                 {showPassword ? (
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <svg width={windowWidth <= 480 ? "20" : "24"} height={windowWidth <= 480 ? "20" : "24"} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M12 4.5C7 4.5 2.73 7.61 1 12C2.73 16.39 7 19.5 12 19.5C17 19.5 21.27 16.39 23 12C21.27 7.61 17 4.5 12 4.5ZM12 17C9.24 17 7 14.76 7 12C7 9.24 9.24 7 12 7C14.76 7 17 9.24 17 12C17 14.76 14.76 17 12 17ZM12 9C10.34 9 9 10.34 9 12C9 13.66 10.34 15 12 15C13.66 15 15 13.66 15 12C15 10.34 13.66 9 12 9Z" fill="#777"/>
                   </svg>
                 ) : (
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <svg width={windowWidth <= 480 ? "20" : "24"} height={windowWidth <= 480 ? "20" : "24"} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M12 7C14.76 7 17 9.24 17 12C17 12.65 16.87 13.26 16.64 13.83L19.56 16.75C21.07 15.49 22.26 13.86 23 12C21.27 7.61 17 4.5 12 4.5C10.6 4.5 9.26 4.75 8 5.2L10.17 7.37C10.74 7.14 11.35 7 12 7ZM2 3.27L4.28 5.55L4.74 6.01C3.08 7.3 1.78 9.02 1 11C2.73 15.39 7 18.5 12 18.5C13.55 18.5 15.03 18.2 16.38 17.66L16.8 18.08L19.73 21L21 19.73L3.27 2L2 3.27ZM7.53 8.8L9.08 10.35C9.03 10.56 9 10.78 9 11C9 12.66 10.34 14 12 14C12.22 14 12.44 13.97 12.65 13.92L14.2 15.47C13.53 15.8 12.79 16 12 16C9.24 16 7 13.76 7 11C7 10.21 7.2 9.47 7.53 8.8ZM11.84 9.02L14.99 12.17L15.01 12.01C15.01 10.35 13.67 9.01 12.01 9.01L11.84 9.02Z" fill="#777"/>
                   </svg>
                 )}
@@ -237,12 +250,12 @@ const LoginPage = () => {
             type="submit"
             style={{
               width: "100%",
-              padding: "14px",
+              padding: windowWidth <= 480 ? "12px" : "14px", // Mobil için padding'i azalt
               backgroundColor: "#D71923",
               color: "white",
               border: "none",
               borderRadius: "5px",
-              fontSize: "16px",
+              fontSize: windowWidth <= 480 ? "14px" : "16px", // Mobil için font boyutunu azalt
               fontWeight: "bold",
               cursor: "pointer"
             }}
