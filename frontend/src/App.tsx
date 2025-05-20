@@ -8,6 +8,12 @@ import RegisterPage from './component/RegisterPage.jsx';
 import HomePage from './component/HomePage.jsx';
 // @ts-ignore
 import VisaApplicationForm from './component/VisaApplicationForm.jsx';
+// @ts-ignore
+import MuhasebePage from './component/MuhasebePage.jsx';
+// @ts-ignore
+import BakiyeIslemleriPage from './component/BakiyeIslemleriPage.jsx';
+// @ts-ignore
+import VizePaneliPage from './component/VizePaneliPage.jsx';
 import './App.css';
 
 const App: React.FC = () => {
@@ -23,6 +29,9 @@ const App: React.FC = () => {
         <Route path="/operasyon" element={<HomePage />} />
         <Route path="/yeni-basvuru" element={<VisaApplicationForm />} />
         <Route path="/vize-basvurularim" element={<VisaApplicationForm />} />
+        <Route path="/muhasebe" element={<MuhasebePage />} />
+        <Route path="/bakiye-islemleri" element={<BakiyeIslemleriPage />} />
+        <Route path="/vize-paneli" element={<VizePaneliPage />} />
         {/* Diğer route'lar buraya eklenebilir */}
       </Routes>
     </Router>
