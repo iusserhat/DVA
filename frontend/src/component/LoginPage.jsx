@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import loginSvg from "../assets/login.svg";
 
 const LoginPage = () => {
@@ -6,6 +7,7 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const navigate = useNavigate();
 
   // Sayfa düzenlemeleri için useEffect
   useEffect(() => {
@@ -62,6 +64,10 @@ const LoginPage = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log("Giriş yapılıyor:", { email, password });
+    
+    // Giriş işlemi burada yapılacak
+    // Başarılı giriş durumunda ana sayfaya yönlendir
+    navigate("/home");
   };
 
   // Responsive form genişliği
