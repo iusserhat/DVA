@@ -24,8 +24,84 @@ const VisaApplicationForm = () => {
     paymentAmount: '',
     paymentBy: ''
   });
+  
+  // Örnek vize başvuruları verisi
+  const [applications, setApplications] = useState([
+    {
+      id: '123456',
+      applicationDate: '17/05/24',
+      fullName: 'İsim Soyisim',
+      visaType: 'Turistik vize (30 gün)',
+      applicationType: '30 Gün Tek Giriş',
+      express: 'Evet',
+      insurance: 'Hayır',
+      fee: '217₺',
+      invoice: 'Hazırlanıyor',
+      status: 'İşlemde'
+    },
+    {
+      id: '123457',
+      applicationDate: '17/05/24',
+      fullName: 'İsim Soyisim',
+      visaType: 'Turistik vize (30 gün)',
+      applicationType: '30 Gün Tek Giriş',
+      express: 'Hayır',
+      insurance: 'Evet',
+      fee: '217₺',
+      invoice: 'Hazırlanıyor',
+      status: 'İşlemde'
+    },
+    {
+      id: '123458',
+      applicationDate: '16/05/24',
+      fullName: 'İsim Soyisim',
+      visaType: 'Turistik vize (30 gün)',
+      applicationType: '30 Gün Tek Giriş',
+      express: 'Hayır',
+      insurance: 'Hayır',
+      fee: '217₺',
+      invoice: 'Hazırlanıyor',
+      status: 'İşlemde'
+    },
+    {
+      id: '123459',
+      applicationDate: '16/05/24',
+      fullName: 'İsim Soyisim',
+      visaType: 'Turistik vize (30 gün)',
+      applicationType: '30 Gün Tek Giriş',
+      express: 'Hayır',
+      insurance: 'Hayır',
+      fee: '217₺',
+      invoice: 'Hazırlanıyor',
+      status: 'İşlemde'
+    },
+    {
+      id: '123460',
+      applicationDate: '15/05/24',
+      fullName: 'İsim Soyisim',
+      visaType: 'Turistik vize (30 gün)',
+      applicationType: '30 Gün Tek Giriş',
+      express: 'Hayır',
+      insurance: 'Hayır',
+      fee: '217₺',
+      invoice: 'Hazırlanıyor',
+      status: 'İşlemde'
+    },
+    {
+      id: '123461',
+      applicationDate: '15/05/24',
+      fullName: 'İsim Soyisim',
+      visaType: 'Turistik vize (30 gün)',
+      applicationType: '30 Gün Tek Giriş',
+      express: 'Evet',
+      insurance: 'Evet',
+      fee: '217₺',
+      invoice: 'Hazırlanıyor',
+      status: 'İşlemde'
+    }
+  ]);
 
-  const [activeTab, setActiveTab] = useState('newApplication');
+  const [activeTab, setActiveTab] = useState('applications'); // Başlangıç olarak başvuruları göstereceğiz
 
   // HTML ve Body stillerini ayarla
   React.useEffect(() => {
@@ -68,6 +144,12 @@ const VisaApplicationForm = () => {
     console.log('Form submitted:', formData);
     // Form gönderme işlemi burada yapılacak
     alert('Başvurunuz alındı!');
+  };
+
+  // Başvuru detayını görüntüleme fonksiyonu
+  const handleViewDetails = (id) => {
+    console.log("Başvuru detayı görüntüleniyor: ", id);
+    // Burada başvuru detaylarını görüntüleme işlemleri yapılabilir
   };
 
   return (
@@ -185,9 +267,10 @@ const VisaApplicationForm = () => {
         {/* Tabs */}
         <div style={{
           display: 'flex',
-          maxWidth: '400px',
+          maxWidth: '1200px',
           width: '90%',
-          marginBottom: '8px'
+          marginBottom: '8px',
+          borderBottom: '1px solid #eee'
         }}>
           <div 
             style={{
@@ -218,721 +301,861 @@ const VisaApplicationForm = () => {
           >
             Yeni Başvuru Yap
           </div>
+          <Link
+            to="/home"
+            style={{
+              padding: '8px',
+              textDecoration: 'none',
+              marginLeft: '15px',
+              color: '#333',
+              fontSize: '13px'
+            }}
+          >
+            Anasayfa
+          </Link>
         </div>
 
-        {/* Form Container */}
-        <div style={{
-          backgroundColor: '#fff',
-          padding: '15px',
-          borderRadius: '8px',
-          width: '90%',
-          maxWidth: '400px',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.12)',
-          boxSizing: 'border-box',
-          marginBottom: '20px',
-          border: '1px solid #eee'
-        }}>
-          <form onSubmit={handleSubmit} style={{ padding: '0' }}>
-            <div style={{ marginBottom: '10px' }}>
-              <div style={{
-                color: '#D71923',
-                fontWeight: 'bold',
-                fontSize: '12px',
-                marginBottom: '3px'
-              }}>
-                İsim Soyisim
-              </div>
-              <input
-                type="text"
-                name="fullName"
-                value={formData.fullName}
-                onChange={handleInputChange}
-                placeholder="Selma Reşan"
-                style={{
-                  width: '100%',
-                  padding: '6px',
-                  border: '1px solid #ddd',
-                  borderRadius: '4px',
-                  backgroundColor: '#f9f9f9',
-                  fontSize: '12px',
-                  marginBottom: '8px'
-                }}
-                required
-              />
-              
-              <div style={{
-                color: '#D71923',
-                fontWeight: 'bold',
-                fontSize: '12px',
-                marginBottom: '3px'
-              }}>
-                Kimlik Numarası
-              </div>
-              <input
-                type="text"
-                name="identityNumber"
-                value={formData.identityNumber}
-                onChange={handleInputChange}
-                placeholder="12345678910"
-                style={{
-                  width: '100%',
-                  padding: '6px',
-                  border: '1px solid #ddd',
-                  borderRadius: '4px',
-                  backgroundColor: '#f9f9f9',
-                  fontSize: '12px'
-                }}
-                required
-              />
-            </div>
-
-            <div style={{ marginBottom: '10px' }}>
-              <div style={{
-                color: '#D71923',
-                fontWeight: 'bold',
-                fontSize: '12px',
-                marginBottom: '3px'
-              }}>
-                Cep Telefonu
-              </div>
-              <input
-                type="tel"
-                name="phoneNumber"
-                value={formData.phoneNumber}
-                onChange={handleInputChange}
-                placeholder="+90 538 366 91 10"
-                style={{
-                  width: '100%',
-                  padding: '6px',
-                  border: '1px solid #ddd',
-                  borderRadius: '4px',
-                  backgroundColor: '#f9f9f9',
-                  fontSize: '12px',
-                  marginBottom: '8px'
-                }}
-                required
-              />
-              
-              <div style={{
-                color: '#D71923',
-                fontWeight: 'bold',
-                fontSize: '12px',
-                marginBottom: '3px'
-              }}>
-                E-posta
-              </div>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                placeholder="ornekmailadresi@dubaivizesi.com"
-                style={{
-                  width: '100%',
-                  padding: '6px',
-                  border: '1px solid #ddd',
-                  borderRadius: '4px',
-                  backgroundColor: '#f9f9f9',
-                  fontSize: '12px'
-                }}
-                required
-              />
-            </div>
-
-            <div style={{ marginBottom: '10px' }}>
-              <div style={{
-                color: '#D71923',
-                fontWeight: 'bold',
-                fontSize: '12px',
-                marginBottom: '3px'
-              }}>
-                Başvuru Tipi
-              </div>
-              <select
-                name="applicationType"
-                value={formData.applicationType}
-                onChange={handleInputChange}
-                style={{
-                  width: '100%',
-                  padding: '6px',
-                  border: '1px solid #ddd',
-                  borderRadius: '4px',
-                  backgroundColor: '#f9f9f9',
-                  fontSize: '12px',
-                  marginBottom: '8px'
-                }}
-                required
-              >
-                <option value="">Seçiniz</option>
-                <option value="turist">Turist</option>
-                <option value="business">İş</option>
-                <option value="student">Öğrenci</option>
-              </select>
-              
-              <div style={{
-                color: '#D71923',
-                fontWeight: 'bold',
-                fontSize: '12px',
-                marginBottom: '3px'
-              }}>
-                Vize Türü
-              </div>
-              <select
-                name="visaType"
-                value={formData.visaType}
-                onChange={handleInputChange}
-                style={{
-                  width: '100%',
-                  padding: '6px',
-                  border: '1px solid #ddd',
-                  borderRadius: '4px',
-                  backgroundColor: '#f9f9f9',
-                  fontSize: '12px'
-                }}
-                required
-              >
-                <option value="">Seçiniz</option>
-                <option value="30">30 Gün Tek Giriş</option>
-                <option value="90">90 Gün Çok Giriş</option>
-              </select>
-            </div>
-
-            <div style={{
-              display: 'flex',
-              gap: '8px',
-              marginBottom: '10px'
+        {/* Applications Table - Shown when activeTab is 'applications' */}
+        {activeTab === 'applications' && (
+          <div style={{
+            width: '90%',
+            maxWidth: '1200px',
+            marginTop: '20px',
+            marginBottom: '20px',
+            overflowX: 'auto'
+          }}>
+            <table style={{
+              width: '100%',
+              borderCollapse: 'collapse',
+              fontSize: '12px'
             }}>
-              <div style={{ flex: '1' }}>
-                <div style={{
-                  color: '#D71923',
-                  fontWeight: 'bold',
-                  fontSize: '12px',
-                  marginBottom: '3px'
+              <thead>
+                <tr style={{ 
+                  borderBottom: '1px solid #eee',
+                  textAlign: 'left',
+                  color: '#333'
                 }}>
-                  Ekspres Başvuru
-                </div>
-                <select
-                  name="expressApplication"
-                  value={formData.expressApplication}
-                  onChange={handleInputChange}
-                  style={{
-                    width: '100%',
-                    padding: '6px',
-                    border: '1px solid #ddd',
-                    borderRadius: '4px',
-                    backgroundColor: '#f9f9f9',
-                    fontSize: '12px'
-                  }}
-                >
-                  <option value="">Hayır</option>
-                  <option value="yes">Evet</option>
-                </select>
-              </div>
-              <div style={{ flex: '1' }}>
-                <div style={{
-                  color: '#D71923',
-                  fontWeight: 'bold',
-                  fontSize: '12px',
-                  marginBottom: '3px'
-                }}>
-                  Sigorta
-                </div>
-                <select
-                  name="insurance"
-                  value={formData.insurance}
-                  onChange={handleInputChange}
-                  style={{
-                    width: '100%',
-                    padding: '6px',
-                    border: '1px solid #ddd',
-                    borderRadius: '4px',
-                    backgroundColor: '#f9f9f9',
-                    fontSize: '12px'
-                  }}
-                >
-                  <option value="">Hayır</option>
-                  <option value="yes">Evet</option>
-                </select>
-              </div>
-              <div style={{ flex: '1' }}>
-                <div style={{
-                  color: '#D71923',
-                  fontWeight: 'bold',
-                  fontSize: '12px',
-                  marginBottom: '3px'
-                }}>
-                  Kullanım Türü
-                </div>
-                <select
-                  name="usageType"
-                  value={formData.usageType}
-                  onChange={handleInputChange}
-                  style={{
-                    width: '100%',
-                    padding: '6px',
-                    border: '1px solid #ddd',
-                    borderRadius: '4px',
-                    backgroundColor: '#f9f9f9',
-                    fontSize: '12px'
-                  }}
-                >
-                  <option value="">Bireysel</option>
-                  <option value="family">Aile</option>
-                  <option value="group">Grup</option>
-                </select>
-              </div>
-            </div>
+                  <th style={{ padding: '8px 4px' }}>Takip No</th>
+                  <th style={{ padding: '8px 4px' }}>Başvuru Tarihi</th>
+                  <th style={{ padding: '8px 4px' }}>İsim Soyisim</th>
+                  <th style={{ padding: '8px 4px' }}>Vize Tipi</th>
+                  <th style={{ padding: '8px 4px' }}>Başvuru Tipi</th>
+                  <th style={{ padding: '8px 4px' }}>Ekspres</th>
+                  <th style={{ padding: '8px 4px' }}>Sigorta</th>
+                  <th style={{ padding: '8px 4px' }}>Ücret</th>
+                  <th style={{ padding: '8px 4px' }}>Fatura</th>
+                  <th style={{ padding: '8px 4px' }}>Başvuru Durumu</th>
+                </tr>
+              </thead>
+              <tbody>
+                {applications.map((app) => (
+                  <tr key={app.id} style={{ borderBottom: '1px solid #eee' }}>
+                    <td style={{ padding: '8px 4px', color: '#333' }}>{app.id}</td>
+                    <td style={{ padding: '8px 4px', color: '#333' }}>{app.applicationDate}</td>
+                    <td style={{ padding: '8px 4px', color: '#333' }}>{app.fullName}</td>
+                    <td style={{ padding: '8px 4px', color: '#333' }}>{app.visaType}</td>
+                    <td style={{ padding: '8px 4px', color: '#333' }}>{app.applicationType}</td>
+                    <td style={{ padding: '8px 4px', color: '#333' }}>{app.express}</td>
+                    <td style={{ padding: '8px 4px', color: '#333' }}>{app.insurance}</td>
+                    <td style={{ padding: '8px 4px', color: '#333' }}>{app.fee}</td>
+                    <td style={{ padding: '8px 4px', color: '#333' }}>{app.invoice}</td>
+                    <td style={{ padding: '8px 4px' }}>
+                      <button
+                        onClick={() => handleViewDetails(app.id)}
+                        style={{
+                          backgroundColor: '#D71923',
+                          color: 'white',
+                          border: 'none',
+                          padding: '4px 8px',
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                          fontSize: '11px'
+                        }}
+                      >
+                        Detay
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
 
-            <div style={{ 
-              textAlign: 'center', 
-              marginTop: '10px', 
-              marginBottom: '8px', 
-              fontWeight: 'bold',
-              fontSize: '13px'
-            }}>
-              Dökümanlar
-            </div>
-              
-            <div style={{
-              display: 'flex',
-              marginBottom: '6px'
-            }}>
-              <div style={{
-                flex: 1,
-                textAlign: 'center',
-                color: '#D71923',
-                fontWeight: 'bold',
-                fontSize: '11px'
-              }}>
-                Pasaport Görseli
-              </div>
-              <div style={{
-                flex: 1,
-                textAlign: 'center',
-                color: '#D71923',
-                fontWeight: 'bold',
-                fontSize: '11px'
-              }}>
-                Vesikalık Fotoğraf
-              </div>
-              <div style={{
-                flex: 1,
-                textAlign: 'center',
-                color: '#D71923',
-                fontWeight: 'bold',
-                fontSize: '11px'
-              }}>
-                Uçak Bileti
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', gap: '6px', marginBottom: '10px' }}>
-              <div style={{ flex: '1', textAlign: 'center' }}>
-                <div style={{ 
-                  border: '1px dashed #ccc', 
-                  borderRadius: '5px', 
-                  padding: '5px',
-                  backgroundColor: '#f9f9f9',
-                  position: 'relative' 
-                }}>
+        {/* Form Container - Shown when activeTab is 'newApplication' */}
+        {activeTab === 'newApplication' && (
+          <div style={{
+            backgroundColor: '#fff',
+            padding: '20px',
+            width: '90%',
+            maxWidth: '600px',
+            boxSizing: 'border-box',
+            marginBottom: '20px'
+          }}>
+            <form onSubmit={handleSubmit} style={{ padding: '0' }}>
+              {/* İlk satır - İsim ve Kimlik No */}
+              <div style={{ display: 'flex', gap: '20px', marginBottom: '20px' }}>
+                <div style={{ flex: '1' }}>
                   <div style={{
-                    width: '70px',
-                    height: '70px',
-                    margin: '0 auto',
-                    backgroundColor: '#eee',
-                    borderRadius: '4px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    overflow: 'hidden'
+                    color: '#D71923',
+                    fontWeight: 'bold',
+                    fontSize: '12px',
+                    marginBottom: '5px'
                   }}>
-                    {formData.passport ? (
-                      <img 
-                        src={URL.createObjectURL(formData.passport)} 
-                        alt="Pasaport" 
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                      />
-                    ) : (
-                      <svg width="30" height="30" fill="#aaa" viewBox="0 0 24 24">
-                        <path d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z" fill="#aaa"/>
-                      </svg>
-                    )}
+                    İsim Soyisim
                   </div>
-                  <input
-                    type="file"
-                    name="passport"
-                    onChange={handleFileChange}
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      width: '100%',
-                      height: '100%',
-                      opacity: 0,
-                      cursor: 'pointer'
-                    }}
-                    accept="image/*"
-                  />
-                </div>
-              </div>
-
-              <div style={{ flex: '1', textAlign: 'center' }}>
-                <div style={{ 
-                  border: '1px dashed #ccc', 
-                  borderRadius: '5px', 
-                  padding: '5px',
-                  backgroundColor: '#f9f9f9',
-                  position: 'relative' 
-                }}>
-                  <div style={{
-                    width: '70px',
-                    height: '70px',
-                    margin: '0 auto',
-                    backgroundColor: '#eee',
-                    borderRadius: '4px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    overflow: 'hidden'
-                  }}>
-                    {formData.photo ? (
-                      <img 
-                        src={URL.createObjectURL(formData.photo)} 
-                        alt="Vesikalık" 
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                      />
-                    ) : (
-                      <svg width="30" height="30" fill="#aaa" viewBox="0 0 24 24">
-                        <path d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z" fill="#aaa"/>
-                      </svg>
-                    )}
-                  </div>
-                  <input
-                    type="file"
-                    name="photo"
-                    onChange={handleFileChange}
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      width: '100%',
-                      height: '100%',
-                      opacity: 0,
-                      cursor: 'pointer'
-                    }}
-                    accept="image/*"
-                  />
-                </div>
-              </div>
-
-              <div style={{ flex: '1', textAlign: 'center' }}>
-                <div style={{ 
-                  border: '1px dashed #ccc', 
-                  borderRadius: '5px', 
-                  padding: '5px',
-                  backgroundColor: '#f9f9f9',
-                  position: 'relative' 
-                }}>
-                  <div style={{
-                    width: '70px',
-                    height: '70px',
-                    margin: '0 auto',
-                    backgroundColor: '#eee',
-                    borderRadius: '4px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    overflow: 'hidden'
-                  }}>
-                    {formData.flightTicket ? (
-                      <img 
-                        src={URL.createObjectURL(formData.flightTicket)} 
-                        alt="Uçak Bileti" 
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                      />
-                    ) : (
-                      <svg width="30" height="30" fill="#aaa" viewBox="0 0 24 24">
-                        <path d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z" fill="#aaa"/>
-                      </svg>
-                    )}
-                  </div>
-                  <input
-                    type="file"
-                    name="flightTicket"
-                    onChange={handleFileChange}
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      width: '100%',
-                      height: '100%',
-                      opacity: 0,
-                      cursor: 'pointer'
-                    }}
-                    accept="image/*"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div style={{
-              display: 'flex',
-              marginBottom: '6px'
-            }}>
-              <div style={{
-                flex: 1,
-                textAlign: 'center',
-                color: '#D71923',
-                fontWeight: 'bold',
-                fontSize: '11px'
-              }}>
-                Otel Rezervasyonu
-              </div>
-              <div style={{
-                flex: 1,
-                textAlign: 'center',
-                color: '#D71923',
-                fontWeight: 'bold',
-                fontSize: '11px'
-              }}>
-                Diğer
-              </div>
-              <div style={{ flex: 1 }}></div>
-            </div>
-
-            <div style={{ display: 'flex', gap: '6px', marginBottom: '8px' }}>
-              <div style={{ flex: '1', textAlign: 'center' }}>
-                <div style={{ 
-                  border: '1px dashed #ccc', 
-                  borderRadius: '5px', 
-                  padding: '5px',
-                  backgroundColor: '#f9f9f9',
-                  position: 'relative' 
-                }}>
-                  <div style={{
-                    width: '70px',
-                    height: '70px',
-                    margin: '0 auto',
-                    backgroundColor: '#eee',
-                    borderRadius: '4px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    overflow: 'hidden'
-                  }}>
-                    {formData.hotelReservation ? (
-                      <img 
-                        src={URL.createObjectURL(formData.hotelReservation)} 
-                        alt="Otel Rezervasyonu" 
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                      />
-                    ) : (
-                      <svg width="30" height="30" fill="#aaa" viewBox="0 0 24 24">
-                        <path d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z" fill="#aaa"/>
-                      </svg>
-                    )}
-                  </div>
-                  <input
-                    type="file"
-                    name="hotelReservation"
-                    onChange={handleFileChange}
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      width: '100%',
-                      height: '100%',
-                      opacity: 0,
-                      cursor: 'pointer'
-                    }}
-                    accept="image/*"
-                  />
-                </div>
-              </div>
-
-              <div style={{ flex: '1', textAlign: 'center' }}>
-                <div style={{ 
-                  border: '1px dashed #ccc', 
-                  borderRadius: '5px', 
-                  padding: '5px',
-                  backgroundColor: '#f9f9f9',
-                  position: 'relative' 
-                }}>
-                  <div style={{
-                    width: '70px',
-                    height: '70px',
-                    margin: '0 auto',
-                    backgroundColor: '#eee',
-                    borderRadius: '4px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    overflow: 'hidden'
-                  }}>
-                    {formData.otherDocument ? (
-                      <img 
-                        src={URL.createObjectURL(formData.otherDocument)} 
-                        alt="Diğer" 
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                      />
-                    ) : (
-                      <svg width="30" height="30" fill="#aaa" viewBox="0 0 24 24">
-                        <path d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z" fill="#aaa"/>
-                      </svg>
-                    )}
-                  </div>
-                  <input
-                    type="file"
-                    name="otherDocument"
-                    onChange={handleFileChange}
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      width: '100%',
-                      height: '100%',
-                      opacity: 0,
-                      cursor: 'pointer'
-                    }}
-                    accept="image/*"
-                  />
-                </div>
-              </div>
-
-              <div style={{ flex: '1' }}></div>
-            </div>
-
-            <div style={{ textAlign: 'center', marginTop: '8px', marginBottom: '5px' }}>
-              <button type="button" style={{
-                backgroundColor: 'transparent',
-                color: '#D71923',
-                border: '1px solid #D71923',
-                padding: '4px 10px',
-                borderRadius: '16px',
-                cursor: 'pointer',
-                fontSize: '11px'
-              }}>
-                Veri Kayıt Ekle
-              </button>
-            </div>
-
-            <hr style={{ 
-              border: 'none', 
-              borderBottom: '1px solid #eee',
-              margin: '10px 0'
-            }} />
-
-            <div style={{
-              display: 'flex',
-              gap: '6px',
-              marginBottom: '10px',
-              marginTop: '8px'
-            }}>
-              <div style={{ flex: '1' }}>
-                <div style={{
-                  color: '#666',
-                  fontWeight: 'normal',
-                  fontSize: '11px',
-                  marginBottom: '3px'
-                }}>
-                  Ödeme Türü
-                </div>
-                <input
-                  type="text"
-                  name="paymentType"
-                  value={formData.paymentType}
-                  onChange={handleInputChange}
-                  style={{
-                    width: '100%',
-                    padding: '6px',
-                    border: '1px solid #ddd',
-                    borderRadius: '4px',
-                    backgroundColor: '#f9f9f9',
-                    fontSize: '11px'
-                  }}
-                />
-              </div>
-              <div style={{ flex: '1' }}>
-                <div style={{
-                  color: '#666',
-                  fontWeight: 'normal',
-                  fontSize: '11px',
-                  marginBottom: '3px'
-                }}>
-                  Ödeme Tutarı
-                </div>
-                <div style={{ display: 'flex', gap: '3px' }}>
                   <input
                     type="text"
-                    name="paymentAmount"
-                    value={formData.paymentAmount}
+                    name="fullName"
+                    value={formData.fullName}
+                    onChange={handleInputChange}
+                    placeholder="Selma Reşan"
+                    style={{
+                      width: '100%',
+                      padding: '8px',
+                      border: '1px solid #ddd',
+                      borderRadius: '4px',
+                      backgroundColor: '#f5f5f5',
+                      fontSize: '12px',
+                    }}
+                    required
+                  />
+                </div>
+                <div style={{ flex: '1' }}>
+                  <div style={{
+                    color: '#D71923',
+                    fontWeight: 'bold',
+                    fontSize: '12px',
+                    marginBottom: '5px'
+                  }}>
+                    Kimlik Numarası
+                  </div>
+                  <input
+                    type="text"
+                    name="identityNumber"
+                    value={formData.identityNumber}
+                    onChange={handleInputChange}
+                    placeholder="12345678910"
+                    style={{
+                      width: '100%',
+                      padding: '8px',
+                      border: '1px solid #ddd',
+                      borderRadius: '4px',
+                      backgroundColor: '#f5f5f5',
+                      fontSize: '12px'
+                    }}
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* İkinci satır - Telefon ve Email */}
+              <div style={{ display: 'flex', gap: '20px', marginBottom: '20px' }}>
+                <div style={{ flex: '1' }}>
+                  <div style={{
+                    color: '#D71923',
+                    fontWeight: 'bold',
+                    fontSize: '12px',
+                    marginBottom: '5px'
+                  }}>
+                    Cep Telefonu
+                  </div>
+                  <input
+                    type="tel"
+                    name="phoneNumber"
+                    value={formData.phoneNumber}
+                    onChange={handleInputChange}
+                    placeholder="+90 538 366 91 10"
+                    style={{
+                      width: '100%',
+                      padding: '8px',
+                      border: '1px solid #ddd',
+                      borderRadius: '4px',
+                      backgroundColor: '#f5f5f5',
+                      fontSize: '12px'
+                    }}
+                    required
+                  />
+                </div>
+                <div style={{ flex: '1' }}>
+                  <div style={{
+                    color: '#D71923',
+                    fontWeight: 'bold',
+                    fontSize: '12px',
+                    marginBottom: '5px'
+                  }}>
+                    E-posta
+                  </div>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    placeholder="ornekmailadresi@dubaivizesi.com"
+                    style={{
+                      width: '100%',
+                      padding: '8px',
+                      border: '1px solid #ddd',
+                      borderRadius: '4px',
+                      backgroundColor: '#f5f5f5',
+                      fontSize: '12px'
+                    }}
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Üçüncü satır - Başvuru Tipi ve Vize Tipi */}
+              <div style={{ display: 'flex', gap: '20px', marginBottom: '20px' }}>
+                <div style={{ flex: '1' }}>
+                  <div style={{
+                    color: '#D71923',
+                    fontWeight: 'bold',
+                    fontSize: '12px',
+                    marginBottom: '5px'
+                  }}>
+                    Başvuru Tipi
+                  </div>
+                  <select
+                    name="applicationType"
+                    value={formData.applicationType}
                     onChange={handleInputChange}
                     style={{
-                      width: '70%',
-                      padding: '6px',
+                      width: '100%',
+                      padding: '8px',
                       border: '1px solid #ddd',
                       borderRadius: '4px',
-                      backgroundColor: '#f9f9f9',
-                      fontSize: '11px'
+                      backgroundColor: '#f5f5f5',
+                      fontSize: '12px',
+                      appearance: 'menulist'
                     }}
-                  />
-                  <input
-                    type="text"
-                    value="TRY"
-                    readOnly
+                    required
+                  >
+                    <option value="">Seçiniz</option>
+                    <option value="turist">Turist</option>
+                    <option value="business">İş</option>
+                    <option value="student">Öğrenci</option>
+                  </select>
+                </div>
+                <div style={{ flex: '1' }}>
+                  <div style={{
+                    color: '#D71923',
+                    fontWeight: 'bold',
+                    fontSize: '12px',
+                    marginBottom: '5px'
+                  }}>
+                    Vize Tipi
+                  </div>
+                  <select
+                    name="visaType"
+                    value={formData.visaType}
+                    onChange={handleInputChange}
                     style={{
-                      width: '30%',
-                      padding: '6px',
+                      width: '100%',
+                      padding: '8px',
                       border: '1px solid #ddd',
                       borderRadius: '4px',
-                      backgroundColor: '#f9f9f9',
-                      fontSize: '11px'
+                      backgroundColor: '#f5f5f5',
+                      fontSize: '12px',
+                      appearance: 'menulist'
                     }}
-                  />
+                    required
+                  >
+                    <option value="">Seçiniz</option>
+                    <option value="30">30 Gün Tek Giriş</option>
+                    <option value="90">90 Gün Çok Giriş</option>
+                  </select>
                 </div>
               </div>
-              <div style={{ flex: '1' }}>
-                <div style={{
-                  color: '#666',
-                  fontWeight: 'normal',
-                  fontSize: '11px',
-                  marginBottom: '3px'
-                }}>
-                  Ödeme Yapan
-                </div>
-                <input
-                  type="text"
-                  name="paymentBy"
-                  value={formData.paymentBy}
-                  onChange={handleInputChange}
-                  style={{
-                    width: '100%',
-                    padding: '6px',
-                    border: '1px solid #ddd',
-                    borderRadius: '4px',
-                    backgroundColor: '#f9f9f9',
-                    fontSize: '11px'
-                  }}
-                />
-              </div>
-            </div>
 
-            <div style={{ textAlign: 'center', marginTop: '10px' }}>
-              <button type="submit" style={{
-                backgroundColor: '#D71923',
-                color: 'white',
-                border: 'none',
-                padding: '6px 18px',
-                borderRadius: '25px',
-                cursor: 'pointer',
-                fontSize: '13px',
-                fontWeight: 'bold'
-              }}>
-                Başvuru Yap
-              </button>
-            </div>
-          </form>
-        </div>
+              {/* Dördüncü satır - Ekspres, Sigorta, Kullanım Türü */}
+              <div style={{ display: 'flex', gap: '20px', marginBottom: '20px' }}>
+                <div style={{ flex: '1' }}>
+                  <div style={{
+                    color: '#D71923',
+                    fontWeight: 'bold',
+                    fontSize: '12px',
+                    marginBottom: '5px'
+                  }}>
+                    Ekspres Başvuru
+                  </div>
+                  <select
+                    name="expressApplication"
+                    value={formData.expressApplication}
+                    onChange={handleInputChange}
+                    style={{
+                      width: '100%',
+                      padding: '8px',
+                      border: '1px solid #ddd',
+                      borderRadius: '4px',
+                      backgroundColor: '#f5f5f5',
+                      fontSize: '12px',
+                      appearance: 'menulist'
+                    }}
+                  >
+                    <option value="">Hayır</option>
+                    <option value="yes">Evet</option>
+                  </select>
+                </div>
+                <div style={{ flex: '1' }}>
+                  <div style={{
+                    color: '#D71923',
+                    fontWeight: 'bold',
+                    fontSize: '12px',
+                    marginBottom: '5px'
+                  }}>
+                    Sigorta
+                  </div>
+                  <select
+                    name="insurance"
+                    value={formData.insurance}
+                    onChange={handleInputChange}
+                    style={{
+                      width: '100%',
+                      padding: '8px',
+                      border: '1px solid #ddd',
+                      borderRadius: '4px',
+                      backgroundColor: '#f5f5f5',
+                      fontSize: '12px',
+                      appearance: 'menulist'
+                    }}
+                  >
+                    <option value="">Hayır</option>
+                    <option value="yes">Evet</option>
+                  </select>
+                </div>
+                <div style={{ flex: '1' }}>
+                  <div style={{
+                    color: '#D71923',
+                    fontWeight: 'bold',
+                    fontSize: '12px',
+                    marginBottom: '5px'
+                  }}>
+                    Kullanım Türü
+                  </div>
+                  <select
+                    name="usageType"
+                    value={formData.usageType}
+                    onChange={handleInputChange}
+                    style={{
+                      width: '100%',
+                      padding: '8px',
+                      border: '1px solid #ddd',
+                      borderRadius: '4px',
+                      backgroundColor: '#f5f5f5',
+                      fontSize: '12px',
+                      appearance: 'menulist'
+                    }}
+                  >
+                    <option value="">Bireysel</option>
+                    <option value="family">Aile</option>
+                    <option value="group">Grup</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* İlk sıra dosya yükleme alanları başlıkları */}
+              <div style={{ display: 'flex', gap: '20px', marginBottom: '10px', marginTop: '30px' }}>
+                <div style={{ flex: '1', textAlign: 'center' }}>
+                  <div style={{
+                    color: '#D71923',
+                    fontWeight: 'bold',
+                    fontSize: '12px'
+                  }}>
+                    Pasaport Görseli
+                  </div>
+                </div>
+                <div style={{ flex: '1', textAlign: 'center' }}>
+                  <div style={{
+                    color: '#D71923',
+                    fontWeight: 'bold',
+                    fontSize: '12px'
+                  }}>
+                    Vesikalık Fotoğraf
+                  </div>
+                </div>
+                <div style={{ flex: '1', textAlign: 'center' }}>
+                  <div style={{
+                    color: '#D71923',
+                    fontWeight: 'bold',
+                    fontSize: '12px'
+                  }}>
+                    Uçak Bileti
+                  </div>
+                </div>
+              </div>
+
+              {/* İlk sıra dosya yükleme alanları */}
+              <div style={{ display: 'flex', gap: '20px', marginBottom: '20px' }}>
+                <div style={{ flex: '1', textAlign: 'center' }}>
+                  <div style={{ 
+                    border: '1px solid #ccc', 
+                    borderRadius: '10px', 
+                    padding: '10px',
+                    position: 'relative',
+                    backgroundColor: '#f5f5f5'
+                  }}>
+                    <div style={{
+                      width: '100%',
+                      height: '80px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      {formData.passport ? (
+                        <img 
+                          src={URL.createObjectURL(formData.passport)} 
+                          alt="Pasaport" 
+                          style={{ maxHeight: '70px', maxWidth: '100%' }} 
+                        />
+                      ) : (
+                        <svg width="80" height="80" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <rect width="200" height="200" rx="20" fill="#E0E0E0" fillOpacity="0.5"/>
+                          <path d="M80 80C93.2548 80 104 69.2548 104 56C104 42.7452 93.2548 32 80 32C66.7452 32 56 42.7452 56 56C56 69.2548 66.7452 80 80 80Z" fill="#CCCCCC"/>
+                          <path d="M120 80C133.255 80 144 69.2548 144 56C144 42.7452 133.255 32 120 32C106.745 32 96 42.7452 96 56C96 69.2548 106.745 80 120 80Z" fill="#CCCCCC"/>
+                          <path d="M140 140V168H60V140C60 129.954 68.9543 122 79 122H121C131.046 122 140 129.954 140 140Z" fill="#CCCCCC"/>
+                        </svg>
+                      )}
+                    </div>
+                    <div style={{ 
+                      position: 'absolute', 
+                      top: '5px', 
+                      right: '5px', 
+                      width: '20px', 
+                      height: '20px', 
+                      backgroundColor: 'white', 
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      border: '1px solid #ccc'
+                    }}>
+                      <span style={{ fontSize: '18px', lineHeight: '18px' }}>+</span>
+                    </div>
+                    <input
+                      type="file"
+                      name="passport"
+                      onChange={handleFileChange}
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        opacity: 0,
+                        cursor: 'pointer'
+                      }}
+                      accept="image/*"
+                    />
+                  </div>
+                </div>
+                <div style={{ flex: '1', textAlign: 'center' }}>
+                  <div style={{ 
+                    border: '1px solid #ccc', 
+                    borderRadius: '10px', 
+                    padding: '10px',
+                    position: 'relative',
+                    backgroundColor: '#f5f5f5'
+                  }}>
+                    <div style={{
+                      width: '100%',
+                      height: '80px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      {formData.photo ? (
+                        <img 
+                          src={URL.createObjectURL(formData.photo)} 
+                          alt="Vesikalık" 
+                          style={{ maxHeight: '70px', maxWidth: '100%' }} 
+                        />
+                      ) : (
+                        <svg width="80" height="80" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <rect width="200" height="200" rx="20" fill="#E0E0E0" fillOpacity="0.5"/>
+                          <path d="M80 80C93.2548 80 104 69.2548 104 56C104 42.7452 93.2548 32 80 32C66.7452 32 56 42.7452 56 56C56 69.2548 66.7452 80 80 80Z" fill="#CCCCCC"/>
+                          <path d="M120 80C133.255 80 144 69.2548 144 56C144 42.7452 133.255 32 120 32C106.745 32 96 42.7452 96 56C96 69.2548 106.745 80 120 80Z" fill="#CCCCCC"/>
+                          <path d="M140 140V168H60V140C60 129.954 68.9543 122 79 122H121C131.046 122 140 129.954 140 140Z" fill="#CCCCCC"/>
+                        </svg>
+                      )}
+                    </div>
+                    <div style={{ 
+                      position: 'absolute', 
+                      top: '5px', 
+                      right: '5px', 
+                      width: '20px', 
+                      height: '20px', 
+                      backgroundColor: 'white', 
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      border: '1px solid #ccc'
+                    }}>
+                      <span style={{ fontSize: '18px', lineHeight: '18px' }}>+</span>
+                    </div>
+                    <input
+                      type="file"
+                      name="photo"
+                      onChange={handleFileChange}
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        opacity: 0,
+                        cursor: 'pointer'
+                      }}
+                      accept="image/*"
+                    />
+                  </div>
+                </div>
+                <div style={{ flex: '1', textAlign: 'center' }}>
+                  <div style={{ 
+                    border: '1px solid #ccc', 
+                    borderRadius: '10px', 
+                    padding: '10px',
+                    position: 'relative',
+                    backgroundColor: '#f5f5f5'
+                  }}>
+                    <div style={{
+                      width: '100%',
+                      height: '80px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      {formData.flightTicket ? (
+                        <img 
+                          src={URL.createObjectURL(formData.flightTicket)} 
+                          alt="Uçak Bileti" 
+                          style={{ maxHeight: '70px', maxWidth: '100%' }} 
+                        />
+                      ) : (
+                        <svg width="80" height="80" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <rect width="200" height="200" rx="20" fill="#E0E0E0" fillOpacity="0.5"/>
+                          <path d="M80 80C93.2548 80 104 69.2548 104 56C104 42.7452 93.2548 32 80 32C66.7452 32 56 42.7452 56 56C56 69.2548 66.7452 80 80 80Z" fill="#CCCCCC"/>
+                          <path d="M120 80C133.255 80 144 69.2548 144 56C144 42.7452 133.255 32 120 32C106.745 32 96 42.7452 96 56C96 69.2548 106.745 80 120 80Z" fill="#CCCCCC"/>
+                          <path d="M140 140V168H60V140C60 129.954 68.9543 122 79 122H121C131.046 122 140 129.954 140 140Z" fill="#CCCCCC"/>
+                        </svg>
+                      )}
+                    </div>
+                    <div style={{ 
+                      position: 'absolute', 
+                      top: '5px', 
+                      right: '5px', 
+                      width: '20px', 
+                      height: '20px', 
+                      backgroundColor: 'white', 
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      border: '1px solid #ccc'
+                    }}>
+                      <span style={{ fontSize: '18px', lineHeight: '18px' }}>+</span>
+                    </div>
+                    <input
+                      type="file"
+                      name="flightTicket"
+                      onChange={handleFileChange}
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        opacity: 0,
+                        cursor: 'pointer'
+                      }}
+                      accept="image/*"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* İkinci sıra dosya yükleme alanları başlıkları */}
+              <div style={{ display: 'flex', gap: '20px', marginBottom: '10px' }}>
+                <div style={{ flex: '1', textAlign: 'center' }}>
+                  <div style={{
+                    color: '#D71923',
+                    fontWeight: 'bold',
+                    fontSize: '12px'
+                  }}>
+                    Otel Rezervasyonu
+                  </div>
+                </div>
+                <div style={{ flex: '1', textAlign: 'center' }}>
+                  <div style={{
+                    color: '#D71923',
+                    fontWeight: 'bold',
+                    fontSize: '12px'
+                  }}>
+                    Diğer
+                  </div>
+                </div>
+                <div style={{ flex: '1' }}></div>
+              </div>
+
+              {/* İkinci sıra dosya yükleme alanları */}
+              <div style={{ display: 'flex', gap: '20px', marginBottom: '30px' }}>
+                <div style={{ flex: '1', textAlign: 'center' }}>
+                  <div style={{ 
+                    border: '1px solid #ccc', 
+                    borderRadius: '10px', 
+                    padding: '10px',
+                    position: 'relative',
+                    backgroundColor: '#f5f5f5'
+                  }}>
+                    <div style={{
+                      width: '100%',
+                      height: '80px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      {formData.hotelReservation ? (
+                        <img 
+                          src={URL.createObjectURL(formData.hotelReservation)} 
+                          alt="Otel Rezervasyonu" 
+                          style={{ maxHeight: '70px', maxWidth: '100%' }} 
+                        />
+                      ) : (
+                        <svg width="80" height="80" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <rect width="200" height="200" rx="20" fill="#E0E0E0" fillOpacity="0.5"/>
+                          <path d="M80 80C93.2548 80 104 69.2548 104 56C104 42.7452 93.2548 32 80 32C66.7452 32 56 42.7452 56 56C56 69.2548 66.7452 80 80 80Z" fill="#CCCCCC"/>
+                          <path d="M120 80C133.255 80 144 69.2548 144 56C144 42.7452 133.255 32 120 32C106.745 32 96 42.7452 96 56C96 69.2548 106.745 80 120 80Z" fill="#CCCCCC"/>
+                          <path d="M140 140V168H60V140C60 129.954 68.9543 122 79 122H121C131.046 122 140 129.954 140 140Z" fill="#CCCCCC"/>
+                        </svg>
+                      )}
+                    </div>
+                    <div style={{ 
+                      position: 'absolute', 
+                      top: '5px', 
+                      right: '5px', 
+                      width: '20px', 
+                      height: '20px', 
+                      backgroundColor: 'white', 
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      border: '1px solid #ccc'
+                    }}>
+                      <span style={{ fontSize: '18px', lineHeight: '18px' }}>+</span>
+                    </div>
+                    <input
+                      type="file"
+                      name="hotelReservation"
+                      onChange={handleFileChange}
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        opacity: 0,
+                        cursor: 'pointer'
+                      }}
+                      accept="image/*"
+                    />
+                  </div>
+                </div>
+                <div style={{ flex: '1', textAlign: 'center' }}>
+                  <div style={{ 
+                    border: '1px solid #ccc', 
+                    borderRadius: '10px', 
+                    padding: '10px',
+                    position: 'relative',
+                    backgroundColor: '#f5f5f5'
+                  }}>
+                    <div style={{
+                      width: '100%',
+                      height: '80px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      {formData.otherDocument ? (
+                        <img 
+                          src={URL.createObjectURL(formData.otherDocument)} 
+                          alt="Diğer" 
+                          style={{ maxHeight: '70px', maxWidth: '100%' }} 
+                        />
+                      ) : (
+                        <svg width="80" height="80" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <rect width="200" height="200" rx="20" fill="#E0E0E0" fillOpacity="0.5"/>
+                          <path d="M80 80C93.2548 80 104 69.2548 104 56C104 42.7452 93.2548 32 80 32C66.7452 32 56 42.7452 56 56C56 69.2548 66.7452 80 80 80Z" fill="#CCCCCC"/>
+                          <path d="M120 80C133.255 80 144 69.2548 144 56C144 42.7452 133.255 32 120 32C106.745 32 96 42.7452 96 56C96 69.2548 106.745 80 120 80Z" fill="#CCCCCC"/>
+                          <path d="M140 140V168H60V140C60 129.954 68.9543 122 79 122H121C131.046 122 140 129.954 140 140Z" fill="#CCCCCC"/>
+                        </svg>
+                      )}
+                    </div>
+                    <div style={{ 
+                      position: 'absolute', 
+                      top: '5px', 
+                      right: '5px', 
+                      width: '20px', 
+                      height: '20px', 
+                      backgroundColor: 'white', 
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      border: '1px solid #ccc'
+                    }}>
+                      <span style={{ fontSize: '18px', lineHeight: '18px' }}>+</span>
+                    </div>
+                    <input
+                      type="file"
+                      name="otherDocument"
+                      onChange={handleFileChange}
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        opacity: 0,
+                        cursor: 'pointer'
+                      }}
+                      accept="image/*"
+                    />
+                  </div>
+                </div>
+                <div style={{ flex: '1' }}></div>
+              </div>
+
+              {/* Yeni Kayıt Ekle butonu */}
+              <div style={{ textAlign: 'center', marginBottom: '30px' }}>
+                <button type="button" style={{
+                  backgroundColor: 'transparent',
+                  color: '#D71923',
+                  border: '1px solid #D71923',
+                  padding: '6px 15px',
+                  borderRadius: '20px',
+                  cursor: 'pointer',
+                  fontSize: '12px',
+                  fontWeight: 'bold'
+                }}>
+                  Yeni Kayıt Ekle
+                </button>
+              </div>
+
+              {/* Ödeme Bilgileri */}
+              <div style={{ marginTop: '30px', marginBottom: '20px' }}>
+                <div style={{ display: 'flex', gap: '20px', marginBottom: '30px' }}>
+                  <div style={{ flex: '1' }}>
+                    <div style={{
+                      color: '#333',
+                      fontSize: '12px',
+                      marginBottom: '5px'
+                    }}>
+                      Ödeme Türü
+                    </div>
+                    <input
+                      type="text"
+                      name="paymentType"
+                      value={formData.paymentType}
+                      onChange={handleInputChange}
+                      style={{
+                        width: '100%',
+                        padding: '8px',
+                        border: '1px solid #ddd',
+                        borderRadius: '4px',
+                        backgroundColor: 'white',
+                        fontSize: '12px'
+                      }}
+                    />
+                  </div>
+                  <div style={{ flex: '1' }}>
+                    <div style={{
+                      color: '#333',
+                      fontSize: '12px',
+                      marginBottom: '5px'
+                    }}>
+                      Ödeme Tutarı
+                    </div>
+                    <div style={{ display: 'flex', gap: '5px' }}>
+                      <input
+                        type="text"
+                        name="paymentAmount"
+                        value={formData.paymentAmount}
+                        onChange={handleInputChange}
+                        style={{
+                          width: '70%',
+                          padding: '8px',
+                          border: '1px solid #ddd',
+                          borderRadius: '4px',
+                          backgroundColor: 'white',
+                          fontSize: '12px'
+                        }}
+                      />
+                      <input
+                        type="text"
+                        value="TRY"
+                        readOnly
+                        style={{
+                          width: '30%',
+                          padding: '8px',
+                          border: '1px solid #ddd',
+                          borderRadius: '4px',
+                          backgroundColor: 'white',
+                          fontSize: '12px'
+                        }}
+                      />
+                    </div>
+                  </div>
+                  <div style={{ flex: '1' }}>
+                    <div style={{
+                      color: '#333',
+                      fontSize: '12px',
+                      marginBottom: '5px'
+                    }}>
+                      Ödeme Yapan
+                    </div>
+                    <input
+                      type="text"
+                      name="paymentBy"
+                      value={formData.paymentBy}
+                      onChange={handleInputChange}
+                      style={{
+                        width: '100%',
+                        padding: '8px',
+                        border: '1px solid #ddd',
+                        borderRadius: '4px',
+                        backgroundColor: 'white',
+                        fontSize: '12px'
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Başvuru Yap butonu */}
+              <div style={{ textAlign: 'center', marginTop: '30px' }}>
+                <button type="submit" style={{
+                  backgroundColor: '#D71923',
+                  color: 'white',
+                  border: 'none',
+                  padding: '8px 25px',
+                  borderRadius: '20px',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: 'bold'
+                }}>
+                  Başvuru Yap
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
       </div>
     </div>
   );
