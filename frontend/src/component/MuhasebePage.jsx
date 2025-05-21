@@ -303,7 +303,7 @@ const MuhasebePage = () => {
           marginBottom: '20px',
           boxSizing: 'border-box'
         }}>
-          <h2 style={{ fontSize: '24px', color: '#333', margin: '0' }}>Finans</h2>
+          <h2 style={{ fontSize: '20px', color: '#333', margin: '0' }}>Finans</h2>
         </div>
 
         {/* Tabs */}
@@ -359,7 +359,7 @@ const MuhasebePage = () => {
               display: 'flex',
               alignItems: 'center',
               padding: '0',
-              fontSize: '14px'
+              fontSize: '12px'
             }}
           >
             <span style={{ marginRight: '5px' }}>Excel Olarak İndir</span>
@@ -372,38 +372,40 @@ const MuhasebePage = () => {
         {/* Muhasebe Table */}
         <div style={{
           width: '100%',
-          maxWidth: '1200px',
+          maxWidth: '900px',
           padding: '0 20px',
           boxSizing: 'border-box',
           overflowX: 'auto'
         }}>
           <table style={{
-            width: '100%',
+            width: '90%',
+            margin: '0 auto',
             borderCollapse: 'collapse',
             backgroundColor: 'white',
             borderRadius: '8px',
             overflow: 'hidden',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+            fontSize: '13px'
           }}>
             <thead>
               <tr>
-                <th style={{ padding: '15px', textAlign: 'left', borderBottom: '1px solid #eee', fontSize: '14px', fontWeight: 'bold', color: '#333' }}>İşlem Tarihi</th>
-                <th style={{ padding: '15px', textAlign: 'left', borderBottom: '1px solid #eee', fontSize: '14px', fontWeight: 'bold', color: '#333' }}>İşlem Sayısı</th>
-                <th style={{ padding: '15px', textAlign: 'left', borderBottom: '1px solid #eee', fontSize: '14px', fontWeight: 'bold', color: '#333' }}>İşlem Tipi</th>
-                <th style={{ padding: '15px', textAlign: 'left', borderBottom: '1px solid #eee', fontSize: '14px', fontWeight: 'bold', color: '#333' }}>Vize Tipi</th>
-                <th style={{ padding: '15px', textAlign: 'left', borderBottom: '1px solid #eee', fontSize: '14px', fontWeight: 'bold', color: '#333' }}>Ücret</th>
-                <th style={{ padding: '15px', textAlign: 'left', borderBottom: '1px solid #eee', fontSize: '14px', fontWeight: 'bold', color: '#333' }}>İşlem Sonu Bakiye</th>
+                <th style={{ padding: '8px', textAlign: 'left', borderBottom: '1px solid #eee', fontSize: '12px', fontWeight: 'bold', color: '#333' }}>İşlem Tarihi</th>
+                <th style={{ padding: '8px', textAlign: 'left', borderBottom: '1px solid #eee', fontSize: '12px', fontWeight: 'bold', color: '#333' }}>İşlem Sayısı</th>
+                <th style={{ padding: '8px', textAlign: 'left', borderBottom: '1px solid #eee', fontSize: '12px', fontWeight: 'bold', color: '#333' }}>İşlem Tipi</th>
+                <th style={{ padding: '8px', textAlign: 'left', borderBottom: '1px solid #eee', fontSize: '12px', fontWeight: 'bold', color: '#333' }}>Vize Tipi</th>
+                <th style={{ padding: '8px', textAlign: 'left', borderBottom: '1px solid #eee', fontSize: '12px', fontWeight: 'bold', color: '#333' }}>Ücret</th>
+                <th style={{ padding: '8px', textAlign: 'left', borderBottom: '1px solid #eee', fontSize: '12px', fontWeight: 'bold', color: '#333' }}>İşlem Sonu Bakiye</th>
               </tr>
             </thead>
             <tbody>
               {muhasebeSatirlar.map((satir) => (
                 <tr key={satir.id}>
-                  <td style={{ padding: '15px', textAlign: 'left', borderBottom: '1px solid #eee', fontSize: '14px', color: '#333' }}>{satir.islemTarihi}</td>
-                  <td style={{ padding: '15px', textAlign: 'left', borderBottom: '1px solid #eee', fontSize: '14px', color: '#333' }}>{satir.islemSayisim}</td>
-                  <td style={{ padding: '15px', textAlign: 'left', borderBottom: '1px solid #eee', fontSize: '14px', color: '#333' }}>{satir.islemTipi}</td>
-                  <td style={{ padding: '15px', textAlign: 'left', borderBottom: '1px solid #eee', fontSize: '14px', color: '#333' }}>{satir.visaTipi}</td>
-                  <td style={{ padding: '15px', textAlign: 'left', borderBottom: '1px solid #eee', fontSize: '14px', color: '#333' }}>{satir.ucret}</td>
-                  <td style={{ padding: '15px', textAlign: 'left', borderBottom: '1px solid #eee', fontSize: '14px', color: '#333' }}>{satir.islemSonuBakiye}</td>
+                  <td style={{ padding: '8px', textAlign: 'left', borderBottom: '1px solid #eee', fontSize: '12px', color: '#333' }}>{satir.islemTarihi}</td>
+                  <td style={{ padding: '8px', textAlign: 'left', borderBottom: '1px solid #eee', fontSize: '12px', color: '#333' }}>{satir.islemSayisim}</td>
+                  <td style={{ padding: '8px', textAlign: 'left', borderBottom: '1px solid #eee', fontSize: '12px', color: '#333' }}>{satir.islemTipi}</td>
+                  <td style={{ padding: '8px', textAlign: 'left', borderBottom: '1px solid #eee', fontSize: '12px', color: '#333' }}>{satir.visaTipi}</td>
+                  <td style={{ padding: '8px', textAlign: 'left', borderBottom: '1px solid #eee', fontSize: '12px', color: '#333' }}>{satir.ucret}</td>
+                  <td style={{ padding: '8px', textAlign: 'left', borderBottom: '1px solid #eee', fontSize: '12px', color: '#333' }}>{satir.islemSonuBakiye}</td>
                 </tr>
               ))}
             </tbody>

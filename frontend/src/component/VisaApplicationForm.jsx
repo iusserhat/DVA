@@ -109,17 +109,36 @@ const VisaApplicationForm = () => {
     document.documentElement.style.height = "100%";
     document.documentElement.style.margin = "0";
     document.documentElement.style.padding = "0";
+    document.documentElement.style.overflowX = "hidden";
     document.body.style.width = "100%";
     document.body.style.height = "100%";
     document.body.style.margin = "0";
     document.body.style.padding = "0";
     document.body.style.backgroundColor = "#fff"; // Beyaz arka plan
-    document.body.style.overflow = "auto";
+    document.body.style.overflowX = "hidden";
 
     return () => {
       document.body.style.backgroundColor = "";
+      document.body.style.overflowX = "";
+      document.documentElement.style.overflowX = "";
     };
   }, []);
+
+  // Ortak stil ayarları
+  const inputStyle = {
+    width: '100%',
+    padding: '6px',
+    border: '1px solid #ddd',
+    borderRadius: '4px',
+    backgroundColor: '#f5f5f5',
+    color: '#333',
+    fontSize: '11px'
+  };
+
+  const whiteInputStyle = {
+    ...inputStyle,
+    backgroundColor: 'white'
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -227,6 +246,7 @@ const VisaApplicationForm = () => {
                     color: 'white',
                     outline: 'none',
                     width: '80px',
+                    placeholderTextColor: 'rgba(255, 255, 255, 0.7)'
                   }}
                 />
                 <svg width="14" height="14" fill="white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
@@ -258,11 +278,14 @@ const VisaApplicationForm = () => {
       <div style={{
         width: '100%',
         marginTop: '60px',
+        paddingTop: '20px',
+        paddingBottom: '50px',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         padding: '0',
-        boxSizing: 'border-box'
+        boxSizing: 'border-box',
+        position: 'relative'
       }}>
         {/* Tabs */}
         <div style={{
@@ -386,21 +409,25 @@ const VisaApplicationForm = () => {
         {activeTab === 'newApplication' && (
           <div style={{
             backgroundColor: '#fff',
-            padding: '20px',
+            padding: '15px',
             width: '90%',
-            maxWidth: '600px',
+            maxWidth: '400px',
             boxSizing: 'border-box',
-            marginBottom: '20px'
+            marginBottom: '40px',
+            maxHeight: '70vh',
+            overflowY: 'auto',
+            border: '1px solid #eaeaea',
+            borderRadius: '5px'
           }}>
             <form onSubmit={handleSubmit} style={{ padding: '0' }}>
               {/* İlk satır - İsim ve Kimlik No */}
-              <div style={{ display: 'flex', gap: '20px', marginBottom: '20px' }}>
+              <div style={{ display: 'flex', gap: '15px', marginBottom: '15px' }}>
                 <div style={{ flex: '1' }}>
                   <div style={{
                     color: '#D71923',
                     fontWeight: 'bold',
-                    fontSize: '12px',
-                    marginBottom: '5px'
+                    fontSize: '11px',
+                    marginBottom: '3px'
                   }}>
                     İsim Soyisim
                   </div>
@@ -410,14 +437,7 @@ const VisaApplicationForm = () => {
                     value={formData.fullName}
                     onChange={handleInputChange}
                     placeholder="Selma Reşan"
-                    style={{
-                      width: '100%',
-                      padding: '8px',
-                      border: '1px solid #ddd',
-                      borderRadius: '4px',
-                      backgroundColor: '#f5f5f5',
-                      fontSize: '12px',
-                    }}
+                    style={whiteInputStyle}
                     required
                   />
                 </div>
@@ -425,8 +445,8 @@ const VisaApplicationForm = () => {
                   <div style={{
                     color: '#D71923',
                     fontWeight: 'bold',
-                    fontSize: '12px',
-                    marginBottom: '5px'
+                    fontSize: '11px',
+                    marginBottom: '3px'
                   }}>
                     Kimlik Numarası
                   </div>
@@ -436,27 +456,20 @@ const VisaApplicationForm = () => {
                     value={formData.identityNumber}
                     onChange={handleInputChange}
                     placeholder="12345678910"
-                    style={{
-                      width: '100%',
-                      padding: '8px',
-                      border: '1px solid #ddd',
-                      borderRadius: '4px',
-                      backgroundColor: '#f5f5f5',
-                      fontSize: '12px'
-                    }}
+                    style={whiteInputStyle}
                     required
                   />
                 </div>
               </div>
 
               {/* İkinci satır - Telefon ve Email */}
-              <div style={{ display: 'flex', gap: '20px', marginBottom: '20px' }}>
+              <div style={{ display: 'flex', gap: '15px', marginBottom: '15px' }}>
                 <div style={{ flex: '1' }}>
                   <div style={{
                     color: '#D71923',
                     fontWeight: 'bold',
-                    fontSize: '12px',
-                    marginBottom: '5px'
+                    fontSize: '11px',
+                    marginBottom: '3px'
                   }}>
                     Cep Telefonu
                   </div>
@@ -466,14 +479,7 @@ const VisaApplicationForm = () => {
                     value={formData.phoneNumber}
                     onChange={handleInputChange}
                     placeholder="+90 538 366 91 10"
-                    style={{
-                      width: '100%',
-                      padding: '8px',
-                      border: '1px solid #ddd',
-                      borderRadius: '4px',
-                      backgroundColor: '#f5f5f5',
-                      fontSize: '12px'
-                    }}
+                    style={whiteInputStyle}
                     required
                   />
                 </div>
@@ -481,8 +487,8 @@ const VisaApplicationForm = () => {
                   <div style={{
                     color: '#D71923',
                     fontWeight: 'bold',
-                    fontSize: '12px',
-                    marginBottom: '5px'
+                    fontSize: '11px',
+                    marginBottom: '3px'
                   }}>
                     E-posta
                   </div>
@@ -492,27 +498,20 @@ const VisaApplicationForm = () => {
                     value={formData.email}
                     onChange={handleInputChange}
                     placeholder="ornekmailadresi@dubaivizesi.com"
-                    style={{
-                      width: '100%',
-                      padding: '8px',
-                      border: '1px solid #ddd',
-                      borderRadius: '4px',
-                      backgroundColor: '#f5f5f5',
-                      fontSize: '12px'
-                    }}
+                    style={whiteInputStyle}
                     required
                   />
                 </div>
               </div>
 
               {/* Üçüncü satır - Başvuru Tipi ve Vize Tipi */}
-              <div style={{ display: 'flex', gap: '20px', marginBottom: '20px' }}>
+              <div style={{ display: 'flex', gap: '15px', marginBottom: '15px' }}>
                 <div style={{ flex: '1' }}>
                   <div style={{
                     color: '#D71923',
                     fontWeight: 'bold',
-                    fontSize: '12px',
-                    marginBottom: '5px'
+                    fontSize: '11px',
+                    marginBottom: '3px'
                   }}>
                     Başvuru Tipi
                   </div>
@@ -520,15 +519,7 @@ const VisaApplicationForm = () => {
                     name="applicationType"
                     value={formData.applicationType}
                     onChange={handleInputChange}
-                    style={{
-                      width: '100%',
-                      padding: '8px',
-                      border: '1px solid #ddd',
-                      borderRadius: '4px',
-                      backgroundColor: '#f5f5f5',
-                      fontSize: '12px',
-                      appearance: 'menulist'
-                    }}
+                    style={whiteInputStyle}
                     required
                   >
                     <option value="">Seçiniz</option>
@@ -541,8 +532,8 @@ const VisaApplicationForm = () => {
                   <div style={{
                     color: '#D71923',
                     fontWeight: 'bold',
-                    fontSize: '12px',
-                    marginBottom: '5px'
+                    fontSize: '11px',
+                    marginBottom: '3px'
                   }}>
                     Vize Tipi
                   </div>
@@ -550,15 +541,7 @@ const VisaApplicationForm = () => {
                     name="visaType"
                     value={formData.visaType}
                     onChange={handleInputChange}
-                    style={{
-                      width: '100%',
-                      padding: '8px',
-                      border: '1px solid #ddd',
-                      borderRadius: '4px',
-                      backgroundColor: '#f5f5f5',
-                      fontSize: '12px',
-                      appearance: 'menulist'
-                    }}
+                    style={whiteInputStyle}
                     required
                   >
                     <option value="">Seçiniz</option>
@@ -569,13 +552,13 @@ const VisaApplicationForm = () => {
               </div>
 
               {/* Dördüncü satır - Ekspres, Sigorta, Kullanım Türü */}
-              <div style={{ display: 'flex', gap: '20px', marginBottom: '20px' }}>
+              <div style={{ display: 'flex', gap: '15px', marginBottom: '15px' }}>
                 <div style={{ flex: '1' }}>
                   <div style={{
                     color: '#D71923',
                     fontWeight: 'bold',
-                    fontSize: '12px',
-                    marginBottom: '5px'
+                    fontSize: '11px',
+                    marginBottom: '3px'
                   }}>
                     Ekspres Başvuru
                   </div>
@@ -583,15 +566,7 @@ const VisaApplicationForm = () => {
                     name="expressApplication"
                     value={formData.expressApplication}
                     onChange={handleInputChange}
-                    style={{
-                      width: '100%',
-                      padding: '8px',
-                      border: '1px solid #ddd',
-                      borderRadius: '4px',
-                      backgroundColor: '#f5f5f5',
-                      fontSize: '12px',
-                      appearance: 'menulist'
-                    }}
+                    style={whiteInputStyle}
                   >
                     <option value="">Hayır</option>
                     <option value="yes">Evet</option>
@@ -601,8 +576,8 @@ const VisaApplicationForm = () => {
                   <div style={{
                     color: '#D71923',
                     fontWeight: 'bold',
-                    fontSize: '12px',
-                    marginBottom: '5px'
+                    fontSize: '11px',
+                    marginBottom: '3px'
                   }}>
                     Sigorta
                   </div>
@@ -610,15 +585,7 @@ const VisaApplicationForm = () => {
                     name="insurance"
                     value={formData.insurance}
                     onChange={handleInputChange}
-                    style={{
-                      width: '100%',
-                      padding: '8px',
-                      border: '1px solid #ddd',
-                      borderRadius: '4px',
-                      backgroundColor: '#f5f5f5',
-                      fontSize: '12px',
-                      appearance: 'menulist'
-                    }}
+                    style={whiteInputStyle}
                   >
                     <option value="">Hayır</option>
                     <option value="yes">Evet</option>
@@ -628,8 +595,8 @@ const VisaApplicationForm = () => {
                   <div style={{
                     color: '#D71923',
                     fontWeight: 'bold',
-                    fontSize: '12px',
-                    marginBottom: '5px'
+                    fontSize: '11px',
+                    marginBottom: '3px'
                   }}>
                     Kullanım Türü
                   </div>
@@ -637,15 +604,7 @@ const VisaApplicationForm = () => {
                     name="usageType"
                     value={formData.usageType}
                     onChange={handleInputChange}
-                    style={{
-                      width: '100%',
-                      padding: '8px',
-                      border: '1px solid #ddd',
-                      borderRadius: '4px',
-                      backgroundColor: '#f5f5f5',
-                      fontSize: '12px',
-                      appearance: 'menulist'
-                    }}
+                    style={whiteInputStyle}
                   >
                     <option value="">Bireysel</option>
                     <option value="family">Aile</option>
@@ -655,12 +614,12 @@ const VisaApplicationForm = () => {
               </div>
 
               {/* İlk sıra dosya yükleme alanları başlıkları */}
-              <div style={{ display: 'flex', gap: '20px', marginBottom: '10px', marginTop: '30px' }}>
+              <div style={{ display: 'flex', gap: '15px', marginBottom: '5px', marginTop: '15px' }}>
                 <div style={{ flex: '1', textAlign: 'center' }}>
                   <div style={{
                     color: '#D71923',
                     fontWeight: 'bold',
-                    fontSize: '12px'
+                    fontSize: '11px'
                   }}>
                     Pasaport Görseli
                   </div>
@@ -669,7 +628,7 @@ const VisaApplicationForm = () => {
                   <div style={{
                     color: '#D71923',
                     fontWeight: 'bold',
-                    fontSize: '12px'
+                    fontSize: '11px'
                   }}>
                     Vesikalık Fotoğraf
                   </div>
@@ -678,7 +637,7 @@ const VisaApplicationForm = () => {
                   <div style={{
                     color: '#D71923',
                     fontWeight: 'bold',
-                    fontSize: '12px'
+                    fontSize: '11px'
                   }}>
                     Uçak Bileti
                   </div>
@@ -686,18 +645,18 @@ const VisaApplicationForm = () => {
               </div>
 
               {/* İlk sıra dosya yükleme alanları */}
-              <div style={{ display: 'flex', gap: '20px', marginBottom: '20px' }}>
+              <div style={{ display: 'flex', gap: '15px', marginBottom: '15px' }}>
                 <div style={{ flex: '1', textAlign: 'center' }}>
                   <div style={{ 
                     border: '1px solid #ccc', 
                     borderRadius: '10px', 
-                    padding: '10px',
+                    padding: '6px',
                     position: 'relative',
                     backgroundColor: '#f5f5f5'
                   }}>
                     <div style={{
                       width: '100%',
-                      height: '80px',
+                      height: '60px',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center'
@@ -706,10 +665,10 @@ const VisaApplicationForm = () => {
                         <img 
                           src={URL.createObjectURL(formData.passport)} 
                           alt="Pasaport" 
-                          style={{ maxHeight: '70px', maxWidth: '100%' }} 
+                          style={{ maxHeight: '55px', maxWidth: '100%' }} 
                         />
                       ) : (
-                        <svg width="80" height="80" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <svg width="60" height="60" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
                           <rect width="200" height="200" rx="20" fill="#E0E0E0" fillOpacity="0.5"/>
                           <path d="M80 80C93.2548 80 104 69.2548 104 56C104 42.7452 93.2548 32 80 32C66.7452 32 56 42.7452 56 56C56 69.2548 66.7452 80 80 80Z" fill="#CCCCCC"/>
                           <path d="M120 80C133.255 80 144 69.2548 144 56C144 42.7452 133.255 32 120 32C106.745 32 96 42.7452 96 56C96 69.2548 106.745 80 120 80Z" fill="#CCCCCC"/>
@@ -721,8 +680,8 @@ const VisaApplicationForm = () => {
                       position: 'absolute', 
                       top: '5px', 
                       right: '5px', 
-                      width: '20px', 
-                      height: '20px', 
+                      width: '18px', 
+                      height: '18px', 
                       backgroundColor: 'white', 
                       borderRadius: '50%',
                       display: 'flex',
@@ -731,7 +690,7 @@ const VisaApplicationForm = () => {
                       cursor: 'pointer',
                       border: '1px solid #ccc'
                     }}>
-                      <span style={{ fontSize: '18px', lineHeight: '18px' }}>+</span>
+                      <span style={{ fontSize: '16px', lineHeight: '16px' }}>+</span>
                     </div>
                     <input
                       type="file"
@@ -754,13 +713,13 @@ const VisaApplicationForm = () => {
                   <div style={{ 
                     border: '1px solid #ccc', 
                     borderRadius: '10px', 
-                    padding: '10px',
+                    padding: '6px',
                     position: 'relative',
                     backgroundColor: '#f5f5f5'
                   }}>
                     <div style={{
                       width: '100%',
-                      height: '80px',
+                      height: '60px',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center'
@@ -769,10 +728,10 @@ const VisaApplicationForm = () => {
                         <img 
                           src={URL.createObjectURL(formData.photo)} 
                           alt="Vesikalık" 
-                          style={{ maxHeight: '70px', maxWidth: '100%' }} 
+                          style={{ maxHeight: '55px', maxWidth: '100%' }} 
                         />
                       ) : (
-                        <svg width="80" height="80" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <svg width="60" height="60" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
                           <rect width="200" height="200" rx="20" fill="#E0E0E0" fillOpacity="0.5"/>
                           <path d="M80 80C93.2548 80 104 69.2548 104 56C104 42.7452 93.2548 32 80 32C66.7452 32 56 42.7452 56 56C56 69.2548 66.7452 80 80 80Z" fill="#CCCCCC"/>
                           <path d="M120 80C133.255 80 144 69.2548 144 56C144 42.7452 133.255 32 120 32C106.745 32 96 42.7452 96 56C96 69.2548 106.745 80 120 80Z" fill="#CCCCCC"/>
@@ -784,8 +743,8 @@ const VisaApplicationForm = () => {
                       position: 'absolute', 
                       top: '5px', 
                       right: '5px', 
-                      width: '20px', 
-                      height: '20px', 
+                      width: '18px', 
+                      height: '18px', 
                       backgroundColor: 'white', 
                       borderRadius: '50%',
                       display: 'flex',
@@ -794,7 +753,7 @@ const VisaApplicationForm = () => {
                       cursor: 'pointer',
                       border: '1px solid #ccc'
                     }}>
-                      <span style={{ fontSize: '18px', lineHeight: '18px' }}>+</span>
+                      <span style={{ fontSize: '16px', lineHeight: '16px' }}>+</span>
                     </div>
                     <input
                       type="file"
@@ -817,13 +776,13 @@ const VisaApplicationForm = () => {
                   <div style={{ 
                     border: '1px solid #ccc', 
                     borderRadius: '10px', 
-                    padding: '10px',
+                    padding: '6px',
                     position: 'relative',
                     backgroundColor: '#f5f5f5'
                   }}>
                     <div style={{
                       width: '100%',
-                      height: '80px',
+                      height: '60px',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center'
@@ -832,10 +791,10 @@ const VisaApplicationForm = () => {
                         <img 
                           src={URL.createObjectURL(formData.flightTicket)} 
                           alt="Uçak Bileti" 
-                          style={{ maxHeight: '70px', maxWidth: '100%' }} 
+                          style={{ maxHeight: '55px', maxWidth: '100%' }} 
                         />
                       ) : (
-                        <svg width="80" height="80" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <svg width="60" height="60" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
                           <rect width="200" height="200" rx="20" fill="#E0E0E0" fillOpacity="0.5"/>
                           <path d="M80 80C93.2548 80 104 69.2548 104 56C104 42.7452 93.2548 32 80 32C66.7452 32 56 42.7452 56 56C56 69.2548 66.7452 80 80 80Z" fill="#CCCCCC"/>
                           <path d="M120 80C133.255 80 144 69.2548 144 56C144 42.7452 133.255 32 120 32C106.745 32 96 42.7452 96 56C96 69.2548 106.745 80 120 80Z" fill="#CCCCCC"/>
@@ -847,8 +806,8 @@ const VisaApplicationForm = () => {
                       position: 'absolute', 
                       top: '5px', 
                       right: '5px', 
-                      width: '20px', 
-                      height: '20px', 
+                      width: '18px', 
+                      height: '18px', 
                       backgroundColor: 'white', 
                       borderRadius: '50%',
                       display: 'flex',
@@ -857,7 +816,7 @@ const VisaApplicationForm = () => {
                       cursor: 'pointer',
                       border: '1px solid #ccc'
                     }}>
-                      <span style={{ fontSize: '18px', lineHeight: '18px' }}>+</span>
+                      <span style={{ fontSize: '16px', lineHeight: '16px' }}>+</span>
                     </div>
                     <input
                       type="file"
@@ -879,12 +838,12 @@ const VisaApplicationForm = () => {
               </div>
 
               {/* İkinci sıra dosya yükleme alanları başlıkları */}
-              <div style={{ display: 'flex', gap: '20px', marginBottom: '10px' }}>
+              <div style={{ display: 'flex', gap: '15px', marginBottom: '5px' }}>
                 <div style={{ flex: '1', textAlign: 'center' }}>
                   <div style={{
                     color: '#D71923',
                     fontWeight: 'bold',
-                    fontSize: '12px'
+                    fontSize: '11px'
                   }}>
                     Otel Rezervasyonu
                   </div>
@@ -893,7 +852,7 @@ const VisaApplicationForm = () => {
                   <div style={{
                     color: '#D71923',
                     fontWeight: 'bold',
-                    fontSize: '12px'
+                    fontSize: '11px'
                   }}>
                     Diğer
                   </div>
@@ -902,18 +861,18 @@ const VisaApplicationForm = () => {
               </div>
 
               {/* İkinci sıra dosya yükleme alanları */}
-              <div style={{ display: 'flex', gap: '20px', marginBottom: '30px' }}>
+              <div style={{ display: 'flex', gap: '15px', marginBottom: '20px' }}>
                 <div style={{ flex: '1', textAlign: 'center' }}>
                   <div style={{ 
                     border: '1px solid #ccc', 
                     borderRadius: '10px', 
-                    padding: '10px',
+                    padding: '6px',
                     position: 'relative',
                     backgroundColor: '#f5f5f5'
                   }}>
                     <div style={{
                       width: '100%',
-                      height: '80px',
+                      height: '60px',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center'
@@ -922,10 +881,10 @@ const VisaApplicationForm = () => {
                         <img 
                           src={URL.createObjectURL(formData.hotelReservation)} 
                           alt="Otel Rezervasyonu" 
-                          style={{ maxHeight: '70px', maxWidth: '100%' }} 
+                          style={{ maxHeight: '55px', maxWidth: '100%' }} 
                         />
                       ) : (
-                        <svg width="80" height="80" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <svg width="60" height="60" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
                           <rect width="200" height="200" rx="20" fill="#E0E0E0" fillOpacity="0.5"/>
                           <path d="M80 80C93.2548 80 104 69.2548 104 56C104 42.7452 93.2548 32 80 32C66.7452 32 56 42.7452 56 56C56 69.2548 66.7452 80 80 80Z" fill="#CCCCCC"/>
                           <path d="M120 80C133.255 80 144 69.2548 144 56C144 42.7452 133.255 32 120 32C106.745 32 96 42.7452 96 56C96 69.2548 106.745 80 120 80Z" fill="#CCCCCC"/>
@@ -937,8 +896,8 @@ const VisaApplicationForm = () => {
                       position: 'absolute', 
                       top: '5px', 
                       right: '5px', 
-                      width: '20px', 
-                      height: '20px', 
+                      width: '18px', 
+                      height: '18px', 
                       backgroundColor: 'white', 
                       borderRadius: '50%',
                       display: 'flex',
@@ -947,7 +906,7 @@ const VisaApplicationForm = () => {
                       cursor: 'pointer',
                       border: '1px solid #ccc'
                     }}>
-                      <span style={{ fontSize: '18px', lineHeight: '18px' }}>+</span>
+                      <span style={{ fontSize: '16px', lineHeight: '16px' }}>+</span>
                     </div>
                     <input
                       type="file"
@@ -970,13 +929,13 @@ const VisaApplicationForm = () => {
                   <div style={{ 
                     border: '1px solid #ccc', 
                     borderRadius: '10px', 
-                    padding: '10px',
+                    padding: '6px',
                     position: 'relative',
                     backgroundColor: '#f5f5f5'
                   }}>
                     <div style={{
                       width: '100%',
-                      height: '80px',
+                      height: '60px',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center'
@@ -985,10 +944,10 @@ const VisaApplicationForm = () => {
                         <img 
                           src={URL.createObjectURL(formData.otherDocument)} 
                           alt="Diğer" 
-                          style={{ maxHeight: '70px', maxWidth: '100%' }} 
+                          style={{ maxHeight: '55px', maxWidth: '100%' }} 
                         />
                       ) : (
-                        <svg width="80" height="80" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <svg width="60" height="60" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
                           <rect width="200" height="200" rx="20" fill="#E0E0E0" fillOpacity="0.5"/>
                           <path d="M80 80C93.2548 80 104 69.2548 104 56C104 42.7452 93.2548 32 80 32C66.7452 32 56 42.7452 56 56C56 69.2548 66.7452 80 80 80Z" fill="#CCCCCC"/>
                           <path d="M120 80C133.255 80 144 69.2548 144 56C144 42.7452 133.255 32 120 32C106.745 32 96 42.7452 96 56C96 69.2548 106.745 80 120 80Z" fill="#CCCCCC"/>
@@ -1000,8 +959,8 @@ const VisaApplicationForm = () => {
                       position: 'absolute', 
                       top: '5px', 
                       right: '5px', 
-                      width: '20px', 
-                      height: '20px', 
+                      width: '18px', 
+                      height: '18px', 
                       backgroundColor: 'white', 
                       borderRadius: '50%',
                       display: 'flex',
@@ -1010,7 +969,7 @@ const VisaApplicationForm = () => {
                       cursor: 'pointer',
                       border: '1px solid #ccc'
                     }}>
-                      <span style={{ fontSize: '18px', lineHeight: '18px' }}>+</span>
+                      <span style={{ fontSize: '16px', lineHeight: '16px' }}>+</span>
                     </div>
                     <input
                       type="file"
@@ -1033,15 +992,15 @@ const VisaApplicationForm = () => {
               </div>
 
               {/* Yeni Kayıt Ekle butonu */}
-              <div style={{ textAlign: 'center', marginBottom: '30px' }}>
+              <div style={{ textAlign: 'center', marginBottom: '15px' }}>
                 <button type="button" style={{
                   backgroundColor: 'transparent',
                   color: '#D71923',
                   border: '1px solid #D71923',
-                  padding: '6px 15px',
+                  padding: '5px 12px',
                   borderRadius: '20px',
                   cursor: 'pointer',
-                  fontSize: '12px',
+                  fontSize: '11px',
                   fontWeight: 'bold'
                 }}>
                   Yeni Kayıt Ekle
@@ -1049,13 +1008,13 @@ const VisaApplicationForm = () => {
               </div>
 
               {/* Ödeme Bilgileri */}
-              <div style={{ marginTop: '30px', marginBottom: '20px' }}>
-                <div style={{ display: 'flex', gap: '20px', marginBottom: '30px' }}>
+              <div style={{ marginTop: '15px', marginBottom: '15px' }}>
+                <div style={{ display: 'flex', gap: '15px', marginBottom: '20px' }}>
                   <div style={{ flex: '1' }}>
                     <div style={{
                       color: '#333',
-                      fontSize: '12px',
-                      marginBottom: '5px'
+                      fontSize: '11px',
+                      marginBottom: '3px'
                     }}>
                       Ödeme Türü
                     </div>
@@ -1064,21 +1023,14 @@ const VisaApplicationForm = () => {
                       name="paymentType"
                       value={formData.paymentType}
                       onChange={handleInputChange}
-                      style={{
-                        width: '100%',
-                        padding: '8px',
-                        border: '1px solid #ddd',
-                        borderRadius: '4px',
-                        backgroundColor: 'white',
-                        fontSize: '12px'
-                      }}
+                      style={whiteInputStyle}
                     />
                   </div>
                   <div style={{ flex: '1' }}>
                     <div style={{
                       color: '#333',
-                      fontSize: '12px',
-                      marginBottom: '5px'
+                      fontSize: '11px',
+                      marginBottom: '3px'
                     }}>
                       Ödeme Tutarı
                     </div>
@@ -1088,35 +1040,21 @@ const VisaApplicationForm = () => {
                         name="paymentAmount"
                         value={formData.paymentAmount}
                         onChange={handleInputChange}
-                        style={{
-                          width: '70%',
-                          padding: '8px',
-                          border: '1px solid #ddd',
-                          borderRadius: '4px',
-                          backgroundColor: 'white',
-                          fontSize: '12px'
-                        }}
+                        style={whiteInputStyle}
                       />
                       <input
                         type="text"
                         value="TRY"
                         readOnly
-                        style={{
-                          width: '30%',
-                          padding: '8px',
-                          border: '1px solid #ddd',
-                          borderRadius: '4px',
-                          backgroundColor: 'white',
-                          fontSize: '12px'
-                        }}
+                        style={whiteInputStyle}
                       />
                     </div>
                   </div>
                   <div style={{ flex: '1' }}>
                     <div style={{
                       color: '#333',
-                      fontSize: '12px',
-                      marginBottom: '5px'
+                      fontSize: '11px',
+                      marginBottom: '3px'
                     }}>
                       Ödeme Yapan
                     </div>
@@ -1125,29 +1063,22 @@ const VisaApplicationForm = () => {
                       name="paymentBy"
                       value={formData.paymentBy}
                       onChange={handleInputChange}
-                      style={{
-                        width: '100%',
-                        padding: '8px',
-                        border: '1px solid #ddd',
-                        borderRadius: '4px',
-                        backgroundColor: 'white',
-                        fontSize: '12px'
-                      }}
+                      style={whiteInputStyle}
                     />
                   </div>
                 </div>
               </div>
 
               {/* Başvuru Yap butonu */}
-              <div style={{ textAlign: 'center', marginTop: '30px' }}>
+              <div style={{ textAlign: 'center', marginTop: '15px', marginBottom: '10px' }}>
                 <button type="submit" style={{
                   backgroundColor: '#D71923',
                   color: 'white',
                   border: 'none',
-                  padding: '8px 25px',
+                  padding: '6px 20px',
                   borderRadius: '20px',
                   cursor: 'pointer',
-                  fontSize: '14px',
+                  fontSize: '13px',
                   fontWeight: 'bold'
                 }}>
                   Başvuru Yap
