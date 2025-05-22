@@ -1,9 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { getUserVisaApplications, getAllVisaApplications } from '../services/visaService';
+import { toast } from 'react-toastify';
 
 const MuhasebePage = () => {
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [showMenu, setShowMenu] = useState(false);
+  const [muhasebeSatirlar, setMuhasebeSatirlar] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(true); // Gerçek uygulamada rol kontrolü yapılır
 
   // Pencere boyutunu izleme
   useEffect(() => {
@@ -15,6 +20,66 @@ const MuhasebePage = () => {
     return () => {
       window.removeEventListener('resize', handleResize);
     };
+  }, []);
+
+  // Verileri yükleme
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        // Veritabanından tüm vize başvurularını getir
+        const response = await getAllVisaApplications();
+        
+        if (response.success) {
+          console.log("Muhasebe verileri başarıyla alındı:", response.data);
+          // Muhasebe verilerini dönüştür
+          const muhasebeVerileri = response.data.map(item => {
+            // Ödeme durumu
+            let odemeDurumu = 'Bekliyor';
+            let durumRenk = '#FFA000'; // Turuncu
+            
+            if (item.paymentStatus === 'completed' || item.payment_status === 'completed') {
+              odemeDurumu = 'Ödendi';
+              durumRenk = '#4CAF50'; // Yeşil
+            } else if (item.paymentStatus === 'partial' || item.payment_status === 'partial') {
+              odemeDurumu = 'Kısmi Ödeme';
+              durumRenk = '#2196F3'; // Mavi
+            } else if (item.paymentStatus === 'refunded' || item.payment_status === 'refunded') {
+              odemeDurumu = 'İade Edildi';
+              durumRenk = '#F44336'; // Kırmızı
+            }
+            
+            return {
+            id: item.id,
+              tarih: new Date(item.createdAt || item.created_at).toLocaleDateString('tr-TR'),
+              basvuruNo: item.id.substring(0, 6),
+              isimSoyisim: item.fullName || item.full_name,
+              vizeTipi: item.visaType || item.visa_type || '30 Günlük Tek Giriş',
+              odemeTutari: item.paymentAmount || item.payment_amount || 0,
+              odemeTuru: item.paymentType || item.payment_type || 'Nakit',
+              odemeDurumu: odemeDurumu,
+              durumRenk: durumRenk,
+              payment_status: item.paymentStatus || item.payment_status,
+              payment_amount: item.paymentAmount || item.payment_amount,
+              payment_type: item.paymentType || item.payment_type,
+              notes: item.paymentNotes || item.payment_notes || ''
+            };
+          });
+          
+          setMuhasebeSatirlar(muhasebeVerileri);
+        } else {
+          console.error("Muhasebe verileri alınamadı:", response.error);
+          toast.error('Muhasebe verileri alınamadı: ' + (response.error || 'Bilinmeyen hata'));
+        }
+      } catch (error) {
+        console.error('Muhasebe verileri getirme hatası:', error);
+        toast.error('Muhasebe verileri yüklenirken bir hata oluştu.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, []);
 
   // Sayfa stillerini ayarlama
@@ -34,19 +99,6 @@ const MuhasebePage = () => {
   // Mobil cihaz kontrolü
   const isMobile = windowWidth <= 768;
 
-  // Örnek tablo verileri
-  const muhasebeSatirlar = [
-    { id: 1, islemTarihi: '16.01.2025', islemSayisim: 'Sanal Bilyok', islemTipi: 'Yatırım', visaTipi: 'SGD Turist Tek Giriş', ucret: '$70', islemSonuBakiye: '$70' },
-    { id: 2, islemTarihi: '16.01.2025', islemSayisim: 'Sanal Bilyok', islemTipi: 'Yatırım', visaTipi: 'SGD Turist Tek Giriş', ucret: '$70', islemSonuBakiye: '$70' },
-    { id: 3, islemTarihi: '16.01.2025', islemSayisim: 'Sanal Bilyok', islemTipi: 'Yatırım', visaTipi: 'SGD Turist Tek Giriş', ucret: '$70', islemSonuBakiye: '$70' },
-    { id: 4, islemTarihi: '16.01.2025', islemSayisim: 'Sanal Bilyok', islemTipi: 'Yatırım', visaTipi: 'SGD Turist Tek Giriş', ucret: '$70', islemSonuBakiye: '$70' },
-    { id: 5, islemTarihi: '16.01.2025', islemSayisim: 'Sanal Bilyok', islemTipi: 'Yatırım', visaTipi: 'SGD Turist Tek Giriş', ucret: '$70', islemSonuBakiye: '$70' },
-    { id: 6, islemTarihi: '16.01.2025', islemSayisim: 'Sanal Bilyok', islemTipi: 'Yatırım', visaTipi: 'SGD Turist Tek Giriş', ucret: '$70', islemSonuBakiye: '$70' },
-    { id: 7, islemTarihi: '16.01.2025', islemSayisim: 'Sanal Bilyok', islemTipi: 'Yatırım', visaTipi: 'SGD Turist Tek Giriş', ucret: '$70', islemSonuBakiye: '$70' },
-    { id: 8, islemTarihi: '16.01.2025', islemSayisim: 'Sanal Bilyok', islemTipi: 'Yatırım', visaTipi: 'SGD Turist Tek Giriş', ucret: '$70', islemSonuBakiye: '$70' },
-    { id: 9, islemTarihi: '16.01.2025', islemSayisim: 'Sanal Bilyok', islemTipi: 'Yatırım', visaTipi: 'SGD Turist Tek Giriş', ucret: '$70', islemSonuBakiye: '$70' },
-  ];
-
   // Excel dosyasını indirme fonksiyonu
   const exportToExcel = () => {
     // Tablo verilerini CSV formatına dönüştürme
@@ -58,12 +110,12 @@ const MuhasebePage = () => {
     // Veri satırlarını ekleyelim
     muhasebeSatirlar.forEach(satir => {
       const row = [
-        satir.islemTarihi,
-        satir.islemSayisim,
-        satir.islemTipi,
-        satir.visaTipi,
-        satir.ucret,
-        satir.islemSonuBakiye
+        satir.tarih,
+        satir.basvuruNo,
+        satir.odemeTuru,
+        satir.vizeTipi,
+        satir.odemeTutari,
+        satir.odemeDurumu
       ];
       csvContent += row.join(',') + '\n';
     });
@@ -78,6 +130,8 @@ const MuhasebePage = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    
+    toast.success('Muhasebe raporu indirildi');
   };
 
   return (
@@ -377,6 +431,15 @@ const MuhasebePage = () => {
           boxSizing: 'border-box',
           overflowX: 'auto'
         }}>
+          {loading ? (
+            <div style={{ textAlign: 'center', padding: '20px', backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+              Yükleniyor...
+            </div>
+          ) : muhasebeSatirlar.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '20px', backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+              Henüz muhasebe kaydı bulunmamaktadır.
+            </div>
+          ) : (
           <table style={{
             width: '90%',
             margin: '0 auto',
@@ -400,16 +463,17 @@ const MuhasebePage = () => {
             <tbody>
               {muhasebeSatirlar.map((satir) => (
                 <tr key={satir.id}>
-                  <td style={{ padding: '8px', textAlign: 'left', borderBottom: '1px solid #eee', fontSize: '12px', color: '#333' }}>{satir.islemTarihi}</td>
-                  <td style={{ padding: '8px', textAlign: 'left', borderBottom: '1px solid #eee', fontSize: '12px', color: '#333' }}>{satir.islemSayisim}</td>
-                  <td style={{ padding: '8px', textAlign: 'left', borderBottom: '1px solid #eee', fontSize: '12px', color: '#333' }}>{satir.islemTipi}</td>
-                  <td style={{ padding: '8px', textAlign: 'left', borderBottom: '1px solid #eee', fontSize: '12px', color: '#333' }}>{satir.visaTipi}</td>
-                  <td style={{ padding: '8px', textAlign: 'left', borderBottom: '1px solid #eee', fontSize: '12px', color: '#333' }}>{satir.ucret}</td>
-                  <td style={{ padding: '8px', textAlign: 'left', borderBottom: '1px solid #eee', fontSize: '12px', color: '#333' }}>{satir.islemSonuBakiye}</td>
+                  <td style={{ padding: '8px', textAlign: 'left', borderBottom: '1px solid #eee', fontSize: '12px', color: '#333' }}>{satir.tarih}</td>
+                  <td style={{ padding: '8px', textAlign: 'left', borderBottom: '1px solid #eee', fontSize: '12px', color: '#333' }}>{satir.basvuruNo}</td>
+                  <td style={{ padding: '8px', textAlign: 'left', borderBottom: '1px solid #eee', fontSize: '12px', color: '#333' }}>{satir.odemeTuru}</td>
+                  <td style={{ padding: '8px', textAlign: 'left', borderBottom: '1px solid #eee', fontSize: '12px', color: '#333' }}>{satir.vizeTipi}</td>
+                  <td style={{ padding: '8px', textAlign: 'left', borderBottom: '1px solid #eee', fontSize: '12px', color: '#333' }}>{satir.odemeTutari}</td>
+                  <td style={{ padding: '8px', textAlign: 'left', borderBottom: '1px solid #eee', fontSize: '12px', color: '#333' }}>{satir.odemeDurumu}</td>
                 </tr>
               ))}
             </tbody>
           </table>
+          )}
         </div>
       </div>
     </div>

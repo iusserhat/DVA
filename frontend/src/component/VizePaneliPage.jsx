@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { getAllVisaApplications, updateVisaStatus } from '../services/visaService';
+import { toast } from 'react-toastify';
 import BasvuruDetayModal from './BasvuruDetayModal';
 
 const VizePaneliPage = () => {
@@ -8,6 +10,8 @@ const VizePaneliPage = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedBasvuru, setSelectedBasvuru] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [basvurular, setBasvurular] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   // Pencere boyutunu izleme
   useEffect(() => {
@@ -19,6 +23,69 @@ const VizePaneliPage = () => {
     return () => {
       window.removeEventListener('resize', handleResize);
     };
+  }, []);
+
+  // Verileri yükleme
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        // Veritabanından tüm vize başvurularını getir
+        const response = await getAllVisaApplications();
+        
+        if (response.success) {
+          console.log("Vize başvuruları başarıyla alındı:", response.data);
+          // Vize başvurularını dönüştür
+          const basvuruVerileri = response.data.map(item => {
+            // Durum rengini belirle
+            let durumRenk = '#9E9E9E'; // Gri (varsayılan)
+            
+            if (item.status === 'onaylandı') {
+              durumRenk = '#8BC34A'; // Yeşil
+            } else if (item.status === 'islemeAlindi') {
+              durumRenk = '#FF9800'; // Turuncu
+            } else if (item.status === 'reddedildi') {
+              durumRenk = '#F44336'; // Kırmızı
+            }
+            
+            return {
+              id: item.id,
+              tarih: new Date(item.createdAt || item.created_at).toLocaleDateString('tr-TR'),
+              basvuruNo: item.id.substring(0, 6),
+              isimSoyisim: item.fullName || item.full_name,
+              telefon: item.phoneNumber || item.phone_number || 'Belirtilmemiş',
+              ekspres: item.expressApplication || item.express_application ? 'Fast' : 'Hayır',
+              sigorta: item.insurance ? 'Evet' : 'Hayır',
+              kullanimTipi: item.usageType || item.usage_type || 'Bireysel',
+              vizeTipi: item.visaType || item.visa_type || '30 Günlük Tek Giriş',
+              basvuruTipi: item.applicationType || item.application_type || 'Yetişkin',
+              sigortasi: item.insurance ? 'Var' : 'Yok',
+              durum: item.status || 'Başvuru Alındı',
+              basvuruSahibi: item.status || 'Başvuru Alındı',
+              durumRenk: durumRenk,
+              status: item.status,
+              payment_status: item.paymentStatus || item.payment_status,
+              payment_amount: item.paymentAmount || item.payment_amount,
+              notes: item.notes,
+              // Orijinal veri bilgilerini de ekleyelim
+              ...item
+            };
+          });
+          
+          setBasvurular(basvuruVerileri);
+        } else {
+          console.error("Vize başvuruları alınamadı:", response.error);
+          toast.error('Vize başvuruları alınamadı: ' + (response.error || 'Bilinmeyen hata'));
+        }
+      } catch (error) {
+        console.error('Vize başvuruları getirme hatası:', error);
+        toast.error('Vize başvuruları yüklenirken bir hata oluştu: ' + (error.message || 'Bilinmeyen hata'));
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, []);
 
   // Sayfa stillerini ayarlama
@@ -37,154 +104,6 @@ const VizePaneliPage = () => {
 
   // Mobil cihaz kontrolü
   const isMobile = windowWidth <= 768;
-
-  // Örnek vize başvuru verileri
-  const basvurular = [
-    { 
-      id: 1, 
-      tarih: '16.01.2025', 
-      basvuruNo: '99999', 
-      isimSoyisim: 'Saad Mohammad', 
-      telefon: '+90 538 886 93 15',
-      ekspres: 'Fast',
-      sigorta: 'Evet',
-      kullanimTipi: 'Bireysel',
-      vizeTipi: '30 Günlük Tek Giriş',
-      basvuruTipi: 'Çocuk',
-      sigortasi: 'Yok',
-      durum: 'Onaylandı',
-      basvuruSahibi: 'İşleme Alındı',
-      durumRenk: '#8BC34A' // Yeşil
-    },
-    { 
-      id: 2, 
-      tarih: '16.01.2025', 
-      basvuruNo: '99999', 
-      isimSoyisim: 'Saad Mohammad', 
-      telefon: '+90 538 886 93 15',
-      ekspres: 'Fast',
-      sigorta: 'Evet',
-      kullanimTipi: 'Bireysel',
-      vizeTipi: '30 Günlük Tek Giriş',
-      basvuruTipi: 'Çocuk',
-      sigortasi: 'Yok',
-      durum: 'İşleme Alındı',
-      basvuruSahibi: 'İşleme Alındı',
-      durumRenk: '#FF9800' // Turuncu
-    },
-    { 
-      id: 3, 
-      tarih: '16.01.2025', 
-      basvuruNo: '99999', 
-      isimSoyisim: 'Saad Mohammad', 
-      telefon: '+90 538 886 93 15',
-      ekspres: 'Fast',
-      sigorta: 'Evet',
-      kullanimTipi: 'Bireysel',
-      vizeTipi: '30 Günlük Tek Giriş',
-      basvuruTipi: 'Çocuk',
-      sigortasi: 'Yok',
-      durum: 'Reddedildi',
-      basvuruSahibi: 'İşleme Alındı',
-      durumRenk: '#F44336' // Kırmızı
-    },
-    { 
-      id: 4, 
-      tarih: '16.01.2025', 
-      basvuruNo: '99999', 
-      isimSoyisim: 'Saad Mohammad', 
-      telefon: '+90 538 886 93 15',
-      ekspres: 'Hayır',
-      sigorta: 'Evet',
-      kullanimTipi: 'Bireysel',
-      vizeTipi: '30 Günlük Tek Giriş',
-      basvuruTipi: 'Yetişkin',
-      sigortasi: 'Yok',
-      durum: 'Başvuru Alındı',
-      basvuruSahibi: 'Başvuru Alındı',
-      durumRenk: '#9E9E9E' // Gri
-    },
-    { 
-      id: 5, 
-      tarih: '16.01.2025', 
-      basvuruNo: '99999', 
-      isimSoyisim: 'Saad Mohammad', 
-      telefon: '+90 538 886 93 15',
-      ekspres: 'Hayır',
-      sigorta: 'Evet',
-      kullanimTipi: 'Bireysel',
-      vizeTipi: 'Vize Uzatma',
-      basvuruTipi: 'Yetişkin',
-      sigortasi: 'Yok',
-      durum: 'Başvuru Alındı',
-      basvuruSahibi: 'Başvuru Alındı',
-      durumRenk: '#9E9E9E' // Gri
-    },
-    { 
-      id: 6, 
-      tarih: '16.01.2025', 
-      basvuruNo: '99999', 
-      isimSoyisim: 'Saad Mohammad', 
-      telefon: '+90 538 886 93 15',
-      ekspres: 'Hayır',
-      sigorta: 'Evet',
-      kullanimTipi: 'Bireysel',
-      vizeTipi: '30 Günlük Tek Giriş',
-      basvuruTipi: 'Yetişkin',
-      sigortasi: 'Yok',
-      durum: 'Başvuru Alındı',
-      basvuruSahibi: 'Başvuru Alındı',
-      durumRenk: '#9E9E9E' // Gri
-    },
-    { 
-      id: 7, 
-      tarih: '16.01.2025', 
-      basvuruNo: '99999', 
-      isimSoyisim: 'Saad Mohammad', 
-      telefon: '+90 538 886 93 15',
-      ekspres: 'Evet',
-      sigorta: 'Evet',
-      kullanimTipi: 'Bireysel',
-      vizeTipi: '30 Günlük Tek Giriş',
-      basvuruTipi: 'Çocuk',
-      sigortasi: 'Yok',
-      durum: 'İşleme Alındı',
-      basvuruSahibi: 'İşleme Alındı',
-      durumRenk: '#FF9800' // Turuncu
-    },
-    { 
-      id: 8, 
-      tarih: '16.01.2025', 
-      basvuruNo: '99999', 
-      isimSoyisim: 'Saad Mohammad', 
-      telefon: '+90 538 886 93 15',
-      ekspres: 'Evet',
-      sigorta: 'Evet',
-      kullanimTipi: 'Bireysel',
-      vizeTipi: '30 Günlük Tek Giriş',
-      basvuruTipi: 'Çocuk',
-      sigortasi: 'Yok',
-      durum: 'İşleme Alındı',
-      basvuruSahibi: 'İşleme Alındı',
-      durumRenk: '#FF9800' // Turuncu
-    },
-    { 
-      id: 9, 
-      tarih: '16.01.2025', 
-      basvuruNo: '99999', 
-      isimSoyisim: 'Saad Mohammad', 
-      telefon: '+90 538 886 93 15',
-      ekspres: 'Evet',
-      sigorta: 'Evet',
-      kullanimTipi: 'Bireysel',
-      vizeTipi: '30 Günlük Tek Giriş',
-      basvuruTipi: 'Çocuk',
-      sigortasi: 'Yok',
-      durum: 'İşleme Alındı',
-      basvuruSahibi: 'İşleme Alındı',
-      durumRenk: '#FF9800' // Turuncu
-    }
-  ];
 
   // Excel'e dışa aktarma fonksiyonu
   const exportToExcel = () => {
@@ -224,6 +143,8 @@ const VizePaneliPage = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    
+    toast.success('Vize başvuruları raporu indirildi');
   };
 
   // Başvuru satırına tıklanınca modal açılması
@@ -235,6 +156,54 @@ const VizePaneliPage = () => {
   // Modalı kapatma
   const handleCloseModal = () => {
     setShowModal(false);
+    // Modal kapandığında verileri güncelle
+    getAllVisaApplications().then(response => {
+      if (response.success) {
+        console.log("Vize başvuruları yeniden yüklendi:", response.data);
+        const guncelBasvurular = response.data.map(item => {
+          // Durum rengini belirle
+          let durumRenk = '#9E9E9E'; // Gri (varsayılan)
+          
+          if (item.status === 'onaylandı') {
+            durumRenk = '#8BC34A'; // Yeşil
+          } else if (item.status === 'islemeAlindi') {
+            durumRenk = '#FF9800'; // Turuncu
+          } else if (item.status === 'reddedildi') {
+            durumRenk = '#F44336'; // Kırmızı
+          }
+          
+          return {
+            id: item.id,
+            tarih: new Date(item.createdAt || item.created_at).toLocaleDateString('tr-TR'),
+            basvuruNo: item.id.substring(0, 6),
+            isimSoyisim: item.fullName || item.full_name,
+            telefon: item.phoneNumber || item.phone_number || 'Belirtilmemiş',
+            ekspres: item.expressApplication || item.express_application ? 'Fast' : 'Hayır',
+            sigorta: item.insurance ? 'Evet' : 'Hayır',
+            kullanimTipi: item.usageType || item.usage_type || 'Bireysel',
+            vizeTipi: item.visaType || item.visa_type || '30 Günlük Tek Giriş',
+            basvuruTipi: item.applicationType || item.application_type || 'Yetişkin',
+            sigortasi: item.insurance ? 'Var' : 'Yok',
+            durum: item.status || 'Başvuru Alındı',
+            basvuruSahibi: item.status || 'Başvuru Alındı',
+            durumRenk: durumRenk,
+            status: item.status,
+            payment_status: item.paymentStatus || item.payment_status,
+            payment_amount: item.paymentAmount || item.payment_amount,
+            notes: item.notes,
+            ...item
+          };
+        });
+        
+        setBasvurular(guncelBasvurular);
+      } else {
+        console.error("Vize başvuruları güncellenemedi:", response.error);
+        toast.error('Vize başvuruları güncellenemedi');
+      }
+    }).catch(error => {
+      console.error('Vize başvuruları güncelleme hatası:', error);
+      toast.error('Veri yenileme sırasında hata oluştu: ' + (error.message || 'Bilinmeyen hata'));
+    });
   };
 
   // Arama işlevi
@@ -244,9 +213,9 @@ const VizePaneliPage = () => {
 
   // Arama filtreleme
   const filteredBasvurular = basvurular.filter(basvuru => 
-    basvuru.isimSoyisim.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    basvuru.basvuruNo.includes(searchTerm) ||
-    basvuru.telefon.includes(searchTerm)
+    basvuru.isimSoyisim?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    basvuru.basvuruNo?.includes(searchTerm) ||
+    basvuru.telefon?.includes(searchTerm)
   );
 
   return (
@@ -334,7 +303,7 @@ const VizePaneliPage = () => {
                   borderRadius: '20px',
                   fontSize: '14px'
                 }}>
-                  Bakiye: <span style={{ fontWeight: 'bold' }}>$457.25</span>
+                  Başvuru: <span style={{ fontWeight: 'bold' }}>{basvurular.length}</span>
                 </div>
               </div>
 
@@ -584,6 +553,15 @@ const VizePaneliPage = () => {
           boxSizing: 'border-box',
           overflowX: 'auto'
         }}>
+          {loading ? (
+            <div style={{ textAlign: 'center', padding: '20px', backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+              Yükleniyor...
+            </div>
+          ) : filteredBasvurular.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '20px', backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+              {searchTerm ? 'Arama kriterlerine uygun başvuru bulunamadı.' : 'Henüz vize başvurusu bulunmamaktadır.'}
+            </div>
+          ) : (
           <table style={{
             width: '100%',
             borderCollapse: 'collapse',
@@ -605,7 +583,7 @@ const VizePaneliPage = () => {
                 <th style={{ padding: '10px', textAlign: 'left', borderBottom: '1px solid #eee', fontSize: '13px', fontWeight: 'bold', color: '#333' }}>Başvuru Tipi</th>
                 <th style={{ padding: '10px', textAlign: 'left', borderBottom: '1px solid #eee', fontSize: '13px', fontWeight: 'bold', color: '#333' }}>Sigortası</th>
                 <th style={{ padding: '10px', textAlign: 'left', borderBottom: '1px solid #eee', fontSize: '13px', fontWeight: 'bold', color: '#333' }}>Durum</th>
-                <th style={{ padding: '10px', textAlign: 'left', borderBottom: '1px solid #eee', fontSize: '13px', fontWeight: 'bold', color: '#333' }}>Başvuru Sahibi</th>
+                  <th style={{ padding: '10px', textAlign: 'left', borderBottom: '1px solid #eee', fontSize: '13px', fontWeight: 'bold', color: '#333' }}>Ödeme</th>
                 <th style={{ padding: '10px', textAlign: 'center', borderBottom: '1px solid #eee', fontSize: '13px', fontWeight: 'bold', color: '#333' }}>İşlemler</th>
               </tr>
             </thead>
@@ -667,12 +645,11 @@ const VizePaneliPage = () => {
                   <td style={{ padding: '10px', textAlign: 'left', borderBottom: '1px solid #eee', fontSize: '13px', color: '#333' }}>
                     <span style={{ 
                       padding: '3px 8px', 
-                      backgroundColor: '#f5f5f5', 
+                        backgroundColor: basvuru.payment_status === 'ödendi' ? '#c8e6c9' : '#ffccbc', 
                       borderRadius: '4px', 
-                      fontSize: '12px',
-                      border: '1px solid #ddd'
+                        fontSize: '12px'
                     }}>
-                      {basvuru.basvuruSahibi}
+                        {basvuru.payment_status || 'Beklemede'}
                     </span>
                   </td>
                   <td style={{ padding: '10px', textAlign: 'center', borderBottom: '1px solid #eee', fontSize: '13px', color: '#333' }}>
@@ -686,6 +663,7 @@ const VizePaneliPage = () => {
               ))}
             </tbody>
           </table>
+          )}
         </div>
       </div>
 

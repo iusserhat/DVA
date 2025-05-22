@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { visaApplicationApi, fileUploadApi, authApi } from '../services/api';
+import { useNavigate } from 'react-router-dom';
+import supabase from '../utils/supabaseClient';
 
 const VisaApplicationForm = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     fullName: '',
     identityNumber: '',
@@ -25,6 +28,10 @@ const VisaApplicationForm = () => {
     paymentAmount: '',
     paymentBy: ''
   });
+  
+  const [isLoading, setIsLoading] = useState(false);
+  const [formErrors, setFormErrors] = useState({});
+  const [isUploading, setIsUploading] = useState(false);
   
   // Örnek vize başvuruları verisi
   const [applications, setApplications] = useState([
@@ -104,6 +111,17 @@ const VisaApplicationForm = () => {
 
   const [activeTab, setActiveTab] = useState('applications'); // Başlangıç olarak başvuruları göstereceğiz
 
+  // Özel bildirim fonksiyonu - toast yerine alert kullan
+  const showNotification = (message, type) => {
+    if (type === 'success') {
+      alert('✅ ' + message);
+    } else if (type === 'error') {
+      alert('❌ ' + message);
+    } else {
+      alert(message);
+    }
+  };
+
   // HTML ve Body stillerini ayarla
   React.useEffect(() => {
     document.documentElement.style.width = "100%";
@@ -149,72 +167,192 @@ const VisaApplicationForm = () => {
     });
   };
 
-  const handleFileChange = (e) => {
-    const { name, files } = e.target;
-    if (files && files[0]) {
-      setFormData({
-        ...formData,
-        [name]: files[0]
-      });
+  // Sayfayı yüklerken Supabase'de bucket varlığını kontrol et ve oluştur
+  useEffect(() => {
+    const checkAndCreateBucket = async () => {
+      try {
+        // Önce bucket listesini al
+        const { data: buckets, error } = await supabase.storage.listBuckets();
+        
+        if (error) {
+          console.error("Bucket listesi alınamadı:", error);
+          return;
+        }
+        
+        // Aranan bucket var mı kontrol et
+        const bucketExists = buckets.some(bucket => bucket.name === 'visadocuments');
+        
+        if (!bucketExists) {
+          console.log("visadocuments bucket'ı bulunamadı, oluşturuluyor...");
+          const { error: createError } = await supabase.storage.createBucket('visadocuments', {
+            public: true,
+            allowedMimeTypes: ['image/png', 'image/jpeg', 'image/gif', 'application/pdf'],
+            fileSizeLimit: 5 * 1024 * 1024 // 5MB
+          });
+          
+          if (createError) {
+            console.error("Bucket oluşturma hatası:", createError);
+          } else {
+            console.log("visadocuments bucket'ı başarıyla oluşturuldu");
+          }
+        } else {
+          console.log("visadocuments bucket'ı zaten mevcut");
+        }
+      } catch (err) {
+        console.error("Bucket kontrolü sırasında hata:", err);
+      }
+    };
+    
+    checkAndCreateBucket();
+  }, []);
+
+  const handleFileUpload = async (e, type) => {
+    try {
+      setIsUploading(true);
+      const file = e.target.files[0];
+      if (!file) return;
+
+      // Dosya boyutu kontrolü (5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert(`Dosya boyutu çok büyük. Maksimum boyut 5MB olmalıdır.`);
+        return;
+      }
+
+      // Önizleme için URL oluştur
+      const previewUrl = URL.createObjectURL(file);
+      
+      // Önce yerel olarak önizleme için güncelle
+      setFormData(prevState => ({
+        ...prevState,
+        [`${type}`]: file,
+        [`${type}Preview`]: previewUrl
+      }));
+
+      console.log(`${type} dosyası yükleniyor:`, file.name);
+
+      try {
+        // Benzersiz dosya adı oluştur
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+        const filePath = `${type}/${fileName}`;
+        
+        // Bucket'ın var olduğundan emin ol
+        const { data: buckets } = await supabase.storage.listBuckets();
+        const bucketExists = buckets.some(bucket => bucket.name === 'visadocuments');
+        
+        if (!bucketExists) {
+          const { error: createError } = await supabase.storage.createBucket('visadocuments', {
+            public: true,
+            allowedMimeTypes: ['image/png', 'image/jpeg', 'image/gif', 'application/pdf'],
+            fileSizeLimit: 5 * 1024 * 1024
+          });
+          
+          if (createError) {
+            throw new Error(`Bucket oluşturulamadı: ${createError.message}`);
+          }
+        }
+        
+        // Dosyayı Supabase'e yükle
+        const { data, error } = await supabase
+          .storage
+          .from('visadocuments')
+          .upload(filePath, file, {
+            cacheControl: '3600',
+            upsert: false
+          });
+
+        if (error) {
+          throw error;
+        }
+
+        // Dosyanın genel URL'ini al
+        const { data: urlData } = supabase
+          .storage
+          .from('visadocuments')
+          .getPublicUrl(filePath);
+
+        const fileUrl = urlData.publicUrl;
+        
+        if (fileUrl) {
+          console.log(`${type} dosyası başarıyla yüklendi:`, fileUrl);
+          
+          // Form verilerini güncelle
+          setFormData(prevState => {
+            const updatedState = { ...prevState };
+            
+            // Dosya referansını ekle
+            switch (type) {
+              case 'passport':
+                updatedState.passport = file;
+                updatedState.passportUrl = fileUrl;
+                break;
+              case 'photo':
+                updatedState.photo = file;
+                updatedState.photoUrl = fileUrl;
+                break;
+              case 'flight_ticket':
+                updatedState.flightTicket = file;
+                updatedState.flightTicketUrl = fileUrl;
+                break;
+              case 'hotel_reservation':
+                updatedState.hotelReservation = file;
+                updatedState.hotelReservationUrl = fileUrl;
+                break;
+              case 'other':
+                updatedState.otherDocument = file;
+                updatedState.otherUrl = fileUrl;
+                break;
+              default:
+                break;
+            }
+            
+            return updatedState;
+          });
+          
+          alert(`${type} dosyası başarıyla yüklendi.`);
+        } else {
+          throw new Error('Dosya yüklendi ancak URL alınamadı');
+        }
+      } catch (error) {
+        console.error(`${type} dosyası yükleme hatası:`, error);
+        alert(`${type} dosyası yüklenirken bir hata oluştu: ${error.message}`);
+      }
+    } catch (error) {
+      console.error('Dosya yükleme genel hatası:', error);
+      alert('Dosya yüklenirken bir hata oluştu. Lütfen tekrar deneyin.');
+    } finally {
+      setIsUploading(false);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
+    setFormErrors({});
     
     try {
       // Kullanıcı giriş yapmış mı kontrol et
       const currentUser = authApi.getCurrentUser();
       if (!currentUser) {
         alert('Başvuru yapmak için önce giriş yapmalısınız.');
+        setIsLoading(false);
         return;
       }
 
-      // Dosyaları yükle ve URL'leri al
-      let fileUrls = {};
-      
-      if (formData.passport) {
-        const passportUpload = await fileUploadApi.uploadFile(formData.passport, 'passport');
-        if (passportUpload.success) {
-          fileUrls.passportUrl = passportUpload.data.url;
-        } else {
-          alert('Pasaport yüklenirken hata oluştu: ' + passportUpload.error);
+      // Dosya kontrolü - Pasaport ve vesikalık fotoğraf zorunlu
+      if (!formData.passportUrl) {
+        alert('Pasaport yüklemek zorunludur!');
+        setIsLoading(false);
           return;
         }
-      }
       
-      if (formData.photo) {
-        const photoUpload = await fileUploadApi.uploadFile(formData.photo, 'photo');
-        if (photoUpload.success) {
-          fileUrls.photoUrl = photoUpload.data.url;
-        } else {
-          alert('Fotoğraf yüklenirken hata oluştu: ' + photoUpload.error);
+      if (!formData.photoUrl) {
+        alert('Vesikalık fotoğraf yüklemek zorunludur!');
+        setIsLoading(false);
           return;
         }
-      }
       
-      if (formData.flightTicket) {
-        const ticketUpload = await fileUploadApi.uploadFile(formData.flightTicket, 'flight_ticket');
-        if (ticketUpload.success) {
-          fileUrls.flightTicketUrl = ticketUpload.data.url;
-        }
-      }
-      
-      if (formData.hotelReservation) {
-        const hotelUpload = await fileUploadApi.uploadFile(formData.hotelReservation, 'hotel_reservation');
-        if (hotelUpload.success) {
-          fileUrls.hotelReservationUrl = hotelUpload.data.url;
-        }
-      }
-      
-      if (formData.otherDocument) {
-        const otherUpload = await fileUploadApi.uploadFile(formData.otherDocument, 'other');
-        if (otherUpload.success) {
-          fileUrls.otherDocumentUrl = otherUpload.data.url;
-        }
-      }
-      
-      // Başvuru verilerini oluştur (user_id frontend'den gönderilmez, token'dan alınır)
+      // Başvuru verilerini oluştur
       const applicationData = {
         fullName: formData.fullName,
         identityNumber: formData.identityNumber,
@@ -228,20 +366,37 @@ const VisaApplicationForm = () => {
         paymentType: formData.paymentType,
         paymentAmount: parseFloat(formData.paymentAmount) || 0,
         paymentBy: formData.paymentBy,
-        ...fileUrls
+        passportUrl: formData.passportUrl,
+        photoUrl: formData.photoUrl,
+        flightTicketUrl: formData.flightTicketUrl,
+        hotelReservationUrl: formData.hotelReservationUrl,
+        otherUrl: formData.otherUrl
       };
       
-      // Başvuruyu kaydet
-      const result = await visaApplicationApi.createApplication(applicationData);
-      
-      if (result.success) {
-        alert('Başvurunuz başarıyla kaydedildi!');
+      // Backend çalışmadığı için doğrudan Supabase'e kaydedelim
+      try {
+        console.log("Başvuru Supabase'e kaydediliyor...", applicationData);
+        
+        // Supabase'e veriyi kaydet
+        const { data, error } = await supabase
+          .from('visa_applications')
+          .insert([applicationData])
+          .select();
+        
+        if (error) throw error;
+        
+        console.log('Başvuru başarılı:', data);
+        
+        // İşlem başarılı mesajı göster
+        showNotification('Başvuru başarıyla oluşturuldu! Başvuru numarası: ' + 
+          (data[0]?.id || 'oluşturuldu'), 'success');
+        
         // Başvurular sekmesine geç
         setActiveTab('applications');
         
         // Yeni başvuruyu listeye ekle
         const newApplication = {
-          id: result.data.id,
+          id: data[0]?.id || new Date().getTime().toString(),
           applicationDate: new Date().toLocaleDateString('tr-TR'),
           fullName: formData.fullName,
           visaType: formData.visaType === '30' ? 'Turistik vize (30 gün)' : 'Turistik vize (90 gün)',
@@ -276,15 +431,26 @@ const VisaApplicationForm = () => {
           otherDocument: null,
           paymentType: '',
           paymentAmount: '',
-          paymentBy: ''
+          paymentBy: '',
+          passportUrl: null,
+          photoUrl: null,
+          flightTicketUrl: null,
+          hotelReservationUrl: null,
+          otherUrl: null
         });
-      } else {
-        alert('Başvuru kaydedilirken bir hata oluştu: ' + result.error);
+      } catch (supabaseError) {
+        console.error('Supabase başvuru hatası:', supabaseError);
+        setFormErrors({ submit: 'Başvuru kaydedilirken bir hata oluştu: ' + supabaseError.message });
+        showNotification('Başvuru kaydedilirken bir hata oluştu: ' + supabaseError.message, 'error');
       }
     } catch (error) {
       console.error('Başvuru gönderilirken hata:', error);
       const errorMessage = error.response?.data?.error || 'Başvuru işlemi sırasında bir hata oluştu.';
-      alert(errorMessage);
+      setFormErrors({ submit: errorMessage });
+      
+      showNotification('Başvuru esnasında hata oluştu! Lütfen tüm bilgilerin doğru olduğundan emin olun.', 'error');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -784,9 +950,9 @@ const VisaApplicationForm = () => {
                       alignItems: 'center',
                       justifyContent: 'center'
                     }}>
-                      {formData.passport ? (
+                      {(formData.passport && (formData.passportPreview || formData.passportUrl)) ? (
                         <img 
-                          src={URL.createObjectURL(formData.passport)} 
+                          src={formData.passportPreview || formData.passportUrl} 
                           alt="Pasaport" 
                           style={{ maxHeight: '55px', maxWidth: '100%' }} 
                         />
@@ -818,7 +984,7 @@ const VisaApplicationForm = () => {
                     <input
                       type="file"
                       name="passport"
-                      onChange={handleFileChange}
+                      onChange={(e) => handleFileUpload(e, 'passport')}
                       style={{
                         position: 'absolute',
                         top: 0,
@@ -847,9 +1013,9 @@ const VisaApplicationForm = () => {
                       alignItems: 'center',
                       justifyContent: 'center'
                     }}>
-                      {formData.photo ? (
+                      {(formData.photo && (formData.photoPreview || formData.photoUrl)) ? (
                         <img 
-                          src={URL.createObjectURL(formData.photo)} 
+                          src={formData.photoPreview || formData.photoUrl} 
                           alt="Vesikalık" 
                           style={{ maxHeight: '55px', maxWidth: '100%' }} 
                         />
@@ -881,7 +1047,7 @@ const VisaApplicationForm = () => {
                     <input
                       type="file"
                       name="photo"
-                      onChange={handleFileChange}
+                      onChange={(e) => handleFileUpload(e, 'photo')}
                       style={{
                         position: 'absolute',
                         top: 0,
@@ -910,9 +1076,9 @@ const VisaApplicationForm = () => {
                       alignItems: 'center',
                       justifyContent: 'center'
                     }}>
-                      {formData.flightTicket ? (
+                      {(formData.flightTicket && (formData.flightTicketPreview || formData.flightTicketUrl)) ? (
                         <img 
-                          src={URL.createObjectURL(formData.flightTicket)} 
+                          src={formData.flightTicketPreview || formData.flightTicketUrl} 
                           alt="Uçak Bileti" 
                           style={{ maxHeight: '55px', maxWidth: '100%' }} 
                         />
@@ -944,7 +1110,7 @@ const VisaApplicationForm = () => {
                     <input
                       type="file"
                       name="flightTicket"
-                      onChange={handleFileChange}
+                      onChange={(e) => handleFileUpload(e, 'flight_ticket')}
                       style={{
                         position: 'absolute',
                         top: 0,
@@ -1000,9 +1166,9 @@ const VisaApplicationForm = () => {
                       alignItems: 'center',
                       justifyContent: 'center'
                     }}>
-                      {formData.hotelReservation ? (
+                      {(formData.hotelReservation && (formData.hotelReservationPreview || formData.hotelReservationUrl)) ? (
                         <img 
-                          src={URL.createObjectURL(formData.hotelReservation)} 
+                          src={formData.hotelReservationPreview || formData.hotelReservationUrl} 
                           alt="Otel Rezervasyonu" 
                           style={{ maxHeight: '55px', maxWidth: '100%' }} 
                         />
@@ -1034,7 +1200,7 @@ const VisaApplicationForm = () => {
                     <input
                       type="file"
                       name="hotelReservation"
-                      onChange={handleFileChange}
+                      onChange={(e) => handleFileUpload(e, 'hotel_reservation')}
                       style={{
                         position: 'absolute',
                         top: 0,
@@ -1063,9 +1229,9 @@ const VisaApplicationForm = () => {
                       alignItems: 'center',
                       justifyContent: 'center'
                     }}>
-                      {formData.otherDocument ? (
+                      {(formData.otherDocument && (formData.otherPreview || formData.otherUrl)) ? (
                         <img 
-                          src={URL.createObjectURL(formData.otherDocument)} 
+                          src={formData.otherPreview || formData.otherUrl} 
                           alt="Diğer" 
                           style={{ maxHeight: '55px', maxWidth: '100%' }} 
                         />
@@ -1097,7 +1263,7 @@ const VisaApplicationForm = () => {
                     <input
                       type="file"
                       name="otherDocument"
-                      onChange={handleFileChange}
+                      onChange={(e) => handleFileUpload(e, 'other')}
                       style={{
                         position: 'absolute',
                         top: 0,

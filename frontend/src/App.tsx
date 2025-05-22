@@ -20,11 +20,14 @@ import DubaiVizesiPage from './component/DubaiVizesiPage.jsx';
 import FinansPage from './component/FinansPage.jsx';
 // @ts-ignore
 import OperasyonPage from './component/OperasyonPage.jsx';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
 
 const App: React.FC = () => {
   return (
     <Router>
+      <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
       <Routes>
         <Route path="/" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />

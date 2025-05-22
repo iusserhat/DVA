@@ -57,35 +57,72 @@ const visaApplicationController = {
     try {
       let applicationData = req.body;
       
+      console.log('------ VİZE BAŞVURUSU OLUŞTURMA BAŞLADI ------');
+      console.log('Gelen istek verileri:', JSON.stringify(applicationData, null, 2));
+      
       // Gerekli alanların kontrolü
-      if (!applicationData.fullName || !applicationData.visaType) {
-        return res.status(400).json({ error: 'Ad Soyad ve Vize Tipi alanları zorunludur' });
+      if (!applicationData.fullName) {
+        console.error('Ad Soyad alanı eksik');
+        return res.status(400).json({ error: 'Ad Soyad alanı zorunludur' });
+      }
+      
+      if (!applicationData.visaType) {
+        console.error('Vize Tipi alanı eksik');
+        return res.status(400).json({ error: 'Vize Tipi alanı zorunludur' });
+      }
+      
+      if (!applicationData.passportUrl) {
+        console.error('Pasaport belgesi eksik');
+        return res.status(400).json({ error: 'Pasaport belgesi zorunludur' });
+      }
+      
+      if (!applicationData.photoUrl) {
+        console.error('Fotoğraf belgesi eksik');
+        return res.status(400).json({ error: 'Fotoğraf belgesi zorunludur' });
       }
       
       // JWT token'dan kullanıcı ID'sini ekle
       if (req.user && req.user.userId) {
+        console.log('Kullanıcı kimliği:', req.user.userId);
         applicationData = {
           ...applicationData,
           user_id: req.user.userId
         };
       } else {
         // Kimlik doğrulama olmadan başvuru yapılamaz
+        console.error('Kullanıcı kimliği bulunamadı');
         return res.status(401).json({ error: 'Başvuru yapmak için giriş yapmalısınız' });
       }
 
-      console.log('Başvuru verileri:', applicationData);
+      console.log('İşlenmiş başvuru verileri:', JSON.stringify(applicationData, null, 2));
 
+      try {
       // Başvuruyu oluştur
+        console.log('Model çağrılıyor: visaApplicationModel.create()');
       const newApplication = await visaApplicationModel.create(applicationData);
       
       if (!newApplication || newApplication.length === 0) {
+          console.error('Model boş yanıt döndü');
         return res.status(400).json({ error: 'Başvuru oluşturulamadı' });
       }
+        
+        console.log('Başvuru başarılı:', JSON.stringify(newApplication, null, 2));
+        console.log('------ VİZE BAŞVURUSU OLUŞTURMA TAMAMLANDI ------');
       
       res.status(201).json(newApplication);
+      } catch (modelError) {
+        console.error('Model hatası:', modelError);
+        res.status(500).json({ 
+          error: modelError.message || 'Veri tabanına kayıt sırasında bir hata oluştu',
+          detail: modelError.toString() 
+        });
+      }
     } catch (error) {
-      console.error('Başvuru oluşturma hatası:', error);
-      res.status(500).json({ error: error.message || 'Başvuru oluşturulurken bir hata oluştu' });
+      console.error('Başvuru oluşturma genel hatası:', error);
+      res.status(500).json({ 
+        error: error.message || 'Başvuru oluşturulurken bir hata oluştu',
+        detail: error.toString()
+      });
     }
   },
 
@@ -152,6 +189,48 @@ const visaApplicationController = {
     } catch (error) {
       console.error('Durum güncelleme hatası:', error);
       res.status(500).json({ error: error.message || 'Durum güncellenirken bir hata oluştu' });
+    }
+  },
+
+  // Ödeme durumunu güncelle
+  updatePaymentStatus: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { payment_status, payment_amount, notes } = req.body;
+      
+      if (!payment_status) {
+        return res.status(400).json({ error: 'Ödeme durumu bilgisi zorunludur' });
+      }
+      
+      // Başvuruyu önce kontrol et
+      const existingApplication = await visaApplicationModel.getById(id);
+      
+      if (!existingApplication) {
+        return res.status(404).json({ error: 'Başvuru bulunamadı' });
+      }
+      
+      // Ödeme güncellemesini sadece admin veya personel yapabilir
+      if (req.user && !['admin', 'staff'].includes(req.user.role)) {
+        return res.status(403).json({ error: 'Ödeme durumu güncelleme yetkiniz yok' });
+      }
+
+      // Ödeme verilerini hazırla
+      const paymentData = {
+        payment_status,
+        payment_amount: payment_amount || existingApplication.payment_amount,
+        payment_notes: notes
+      };
+
+      const updatedApplication = await visaApplicationModel.updatePayment(id, paymentData);
+      
+      if (!updatedApplication || updatedApplication.length === 0) {
+        return res.status(400).json({ error: 'Ödeme durumu güncellenemedi' });
+      }
+      
+      res.status(200).json(updatedApplication);
+    } catch (error) {
+      console.error('Ödeme durumu güncelleme hatası:', error);
+      res.status(500).json({ error: error.message || 'Ödeme durumu güncellenirken bir hata oluştu' });
     }
   },
 

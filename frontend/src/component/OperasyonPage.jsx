@@ -1,9 +1,87 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { getAllVisaApplications } from '../services/visaService';
+import { toast } from 'react-toastify';
 
 const OperasyonPage = () => {
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const [loading, setLoading] = useState(false);
+  const [operasyonOzeti, setOperasyonOzeti] = useState({
+    toplamBasvuru: 0,
+    bekleyenBasvuru: 0,
+    islemeAlinanBasvuru: 0,
+    tamamlananBasvuru: 0
+  });
+  const [operasyonVerileri, setOperasyonVerileri] = useState([]);
+
+  // Pencere boyutunu izleme
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+  // Verileri yükleme
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        // Veritabanından tüm vize başvurularını getir
+        const response = await getAllVisaApplications();
+        
+        if (response.success) {
+          console.log("Operasyon verileri başarıyla alındı:", response.data);
+          // Operasyon verilerini dönüştür
+          const operasyonVerileri = response.data.map(item => {
+            // Durum rengini belirle
+            let durumRenk = '#9E9E9E'; // Gri (varsayılan)
+            
+            if (item.status === 'onaylandı') {
+              durumRenk = '#8BC34A'; // Yeşil
+            } else if (item.status === 'islemeAlindi') {
+              durumRenk = '#FF9800'; // Turuncu
+            } else if (item.status === 'reddedildi') {
+              durumRenk = '#F44336'; // Kırmızı
+            }
+            
+            return {
+              id: item.id,
+              tarih: new Date(item.createdAt || item.created_at).toLocaleDateString('tr-TR'),
+              basvuruNo: item.id.substring(0, 6),
+              isimSoyisim: item.fullName || item.full_name,
+              kimlikNo: item.identityNumber || item.identity_number,
+              telefon: item.phoneNumber || item.phone_number,
+              email: item.email,
+              vizeTipi: item.visaType || item.visa_type,
+              basvuruTipi: item.applicationType || item.application_type,
+              durum: item.status,
+              durumRenk: durumRenk
+            };
+          });
+          
+          setOperasyonVerileri(operasyonVerileri);
+        } else {
+          console.error("Operasyon verileri alınamadı:", response.error);
+          toast.error('Operasyon verileri alınamadı: ' + (response.error || 'Bilinmeyen hata'));
+        }
+      } catch (error) {
+        console.error('Operasyon verileri getirme hatası:', error);
+        toast.error('Operasyon verileri yüklenirken bir hata oluştu.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   // HTML ve Body stillerini ayarla
-  React.useEffect(() => {
+  useEffect(() => {
     document.documentElement.style.width = "100%";
     document.documentElement.style.height = "100%";
     document.documentElement.style.margin = "0";
@@ -22,6 +100,9 @@ const OperasyonPage = () => {
       document.documentElement.style.overflowX = "";
     };
   }, []);
+
+  // Mobil cihaz kontrolü
+  const isMobile = windowWidth <= 768;
 
   return (
     <div style={{
@@ -151,6 +232,58 @@ const OperasyonPage = () => {
           <p style={{ fontSize: '14px', lineHeight: '1.6', color: '#333', marginBottom: '15px' }}>
             Dubai Vizesi operasyon yönetim paneline hoş geldiniz. Operasyonel işlemlerinizi buradan yönetebilirsiniz.
           </p>
+          
+          {/* Özet Kartları */}
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: isMobile ? '1fr 1fr' : '1fr 1fr 1fr 1fr', 
+            gap: '10px', 
+            marginBottom: '30px' 
+          }}>
+            {/* Toplam Başvuru */}
+            <div style={{
+              backgroundColor: '#f8f9fa',
+              borderRadius: '8px',
+              padding: '15px',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+            }}>
+              <h3 style={{ fontSize: '14px', color: '#666', margin: '0 0 5px 0' }}>Toplam Başvuru</h3>
+              <p style={{ fontSize: '20px', fontWeight: 'bold', color: '#333', margin: 0 }}>{operasyonOzeti.toplamBasvuru}</p>
+            </div>
+            
+            {/* Bekleyen Başvuru */}
+            <div style={{
+              backgroundColor: '#fff8e1',
+              borderRadius: '8px',
+              padding: '15px',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+            }}>
+              <h3 style={{ fontSize: '14px', color: '#666', margin: '0 0 5px 0' }}>Bekleyen</h3>
+              <p style={{ fontSize: '20px', fontWeight: 'bold', color: '#ff9800', margin: 0 }}>{operasyonOzeti.bekleyenBasvuru}</p>
+            </div>
+            
+            {/* İşleme Alınan */}
+            <div style={{
+              backgroundColor: '#e3f2fd',
+              borderRadius: '8px',
+              padding: '15px',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+            }}>
+              <h3 style={{ fontSize: '14px', color: '#666', margin: '0 0 5px 0' }}>İşleme Alınan</h3>
+              <p style={{ fontSize: '20px', fontWeight: 'bold', color: '#2196f3', margin: 0 }}>{operasyonOzeti.islemeAlinanBasvuru}</p>
+            </div>
+            
+            {/* Tamamlanan */}
+            <div style={{
+              backgroundColor: '#e8f5e9',
+              borderRadius: '8px',
+              padding: '15px',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+            }}>
+              <h3 style={{ fontSize: '14px', color: '#666', margin: '0 0 5px 0' }}>Tamamlanan</h3>
+              <p style={{ fontSize: '20px', fontWeight: 'bold', color: '#4caf50', margin: 0 }}>{operasyonOzeti.tamamlananBasvuru}</p>
+            </div>
+          </div>
           
           <div style={{ marginTop: '30px', display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
             <Link to="/vize-paneli" style={{

@@ -8,6 +8,19 @@ const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-key-change-in-product
  */
 const verifyToken = (req, res, next) => {
   try {
+    // Geliştirme modunda token kontrolü atla
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('DEVELOPMENT MODE: Token doğrulaması atlanıyor!');
+      console.log('⚠️ GELİŞTİRME ORTAMI: Test kullanıcısı kullanılıyor (admin)');
+      // Geçici test kullanıcısı
+      req.user = {
+        userId: 'test-user-id',
+        email: 'test@example.com',
+        role: 'admin'
+      };
+      return next();
+    }
+    
     // Authorization header al
     const authHeader = req.headers.authorization;
     

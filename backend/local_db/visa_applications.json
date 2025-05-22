@@ -1,0 +1,25 @@
+[
+  {
+    "user_id": "test-user-id",
+    "full_name": "serhat özen",
+    "identity_number": "12345678900",
+    "phone_number": "+905466510215",
+    "email": "iusserhat7@gmail.com",
+    "application_type": "turist",
+    "visa_type": "30",
+    "express_application": true,
+    "insurance": true,
+    "usage_type": "individual",
+    "passport_url": "/uploads/passport/3ea29c67-3705-485b-bb4d-dc7c40d393bc.jfif",
+    "photo_url": "/uploads/photo/ebbbbf24-149b-4168-bad2-ac2128d01c19.jfif",
+    "flight_ticket_url": "/uploads/flight_ticket/edbbe2b0-0831-47eb-a4e4-641b33771c40.jpg",
+    "hotel_reservation_url": "/uploads/hotel_reservation/e1e0b961-5415-43ed-a9e1-8ea9c5a12df2.png",
+    "other_url": "/uploads/other/4790fbed-9132-4459-814b-c84c2f53259f.jfif",
+    "payment_type": "kart",
+    "payment_amount": 1000,
+    "payment_by": "serhat",
+    "status": "pending",
+    "created_at": "2025-05-22T09:29:17.200Z",
+    "id": "supabase-error-1747906157464"
+  }
+]

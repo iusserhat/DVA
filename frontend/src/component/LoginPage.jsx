@@ -92,6 +92,8 @@ const LoginPage = () => {
           setError('Geçersiz e-posta veya şifre. Lütfen bilgilerinizi kontrol edin.');
         } else if (error.message.includes('rate limit')) {
           setError('Çok fazla giriş denemesi yaptınız. Lütfen biraz bekleyip tekrar deneyin.');
+        } else if (error.message.includes('Failed to fetch')) {
+          setError('Sunucuya bağlanılamıyor. Lütfen internet bağlantınızı kontrol edin ve tekrar deneyin.');
         } else {
           setError('Giriş yapılırken bir hata oluştu: ' + error.message);
         }
@@ -112,7 +114,13 @@ const LoginPage = () => {
       }
     } catch (err) {
       console.error("Beklenmeyen hata:", err);
+      
+      // Network hataları için özel mesaj
+      if (err.message === 'Failed to fetch' || err.name === 'TypeError') {
+        setError("Sunucuya bağlanılamadı. Lütfen internet bağlantınızı kontrol edin.");
+      } else {
       setError("Giriş sırasında bir hata oluştu. Lütfen tekrar deneyin.");
+      }
     } finally {
       setLoading(false);
     }

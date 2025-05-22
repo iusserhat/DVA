@@ -1,9 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { getUserVisaApplications } from '../services/visaService';
+import { toast } from 'react-toastify';
 
 const BakiyeIslemleriPage = () => {
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [showMenu, setShowMenu] = useState(false);
+  const [bakiyeIslemleri, setBakiyeIslemleri] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [bakiye, setBakiye] = useState('0');
 
   // Pencere boyutunu izleme
   useEffect(() => {
@@ -15,6 +20,45 @@ const BakiyeIslemleriPage = () => {
     return () => {
       window.removeEventListener('resize', handleResize);
     };
+  }, []);
+
+  // Verileri yükleme
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const response = await getUserVisaApplications();
+        if (response.success) {
+          // Vize başvurularını ödeme bilgilerine dönüştür
+          const odemeler = response.data
+            .filter(item => item.payment_status === 'ödendi')
+            .map(item => ({
+              id: item.id,
+              olusturmaTarihi: new Date(item.payment_date).toLocaleDateString('tr-TR'),
+              ucret: `$${item.amount}`,
+              gonderenKisi: item.applicant_name || 'İsimsiz'
+            }));
+          
+          setBakiyeIslemleri(odemeler);
+          
+          // Toplam bakiye hesaplama
+          const toplamBakiye = response.data
+            .filter(item => item.payment_status === 'ödendi')
+            .reduce((total, item) => total + (parseFloat(item.amount) || 0), 0);
+          
+          setBakiye(toplamBakiye.toFixed(2));
+        } else {
+          toast.error('Bakiye bilgileri alınamadı');
+        }
+      } catch (error) {
+        console.error('Bakiye işlemleri getirme hatası:', error);
+        toast.error('Bakiye işlemleri yüklenirken bir hata oluştu');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, []);
 
   // Sayfa stillerini ayarlama
@@ -33,15 +77,6 @@ const BakiyeIslemleriPage = () => {
 
   // Mobil cihaz kontrolü
   const isMobile = windowWidth <= 768;
-
-  // Örnek tablo verileri
-  const bakiyeIslemleri = [
-    { id: 1, olusturmaTarihi: '16.02.2024', ucret: '$110', gonderenKisi: 'Saad Mohammad' },
-    { id: 2, olusturmaTarihi: '16.02.2024', ucret: '$110', gonderenKisi: 'Saad Mohammad' },
-    { id: 3, olusturmaTarihi: '16.02.2024', ucret: '$110', gonderenKisi: 'Saad Mohammad' },
-    { id: 4, olusturmaTarihi: '16.02.2024', ucret: '$110', gonderenKisi: 'Saad Mohammad' },
-    { id: 5, olusturmaTarihi: '16.02.2024', ucret: '$110', gonderenKisi: 'Saad Mohammad' },
-  ];
 
   // Bakiye yükleme fonksiyonu
   const handleBakiyeYukle = () => {
@@ -133,7 +168,7 @@ const BakiyeIslemleriPage = () => {
                   borderRadius: '20px',
                   fontSize: '14px'
                 }}>
-                  Bakiye: <span style={{ fontWeight: 'bold' }}>$457.25</span>
+                  Bakiye: <span style={{ fontWeight: 'bold' }}>${bakiye}</span>
                 </div>
               </div>
 
@@ -376,6 +411,13 @@ const BakiyeIslemleriPage = () => {
           boxSizing: 'border-box',
           overflowX: 'auto'
         }}>
+          {loading ? (
+            <div style={{ textAlign: 'center', padding: '20px' }}>Yükleniyor...</div>
+          ) : bakiyeIslemleri.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '20px', backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+              Henüz bakiye işlemi bulunmamaktadır.
+            </div>
+          ) : (
           <table style={{
             width: '100%',
             borderCollapse: 'collapse',
@@ -401,6 +443,7 @@ const BakiyeIslemleriPage = () => {
               ))}
             </tbody>
           </table>
+          )}
         </div>
       </div>
     </div>
