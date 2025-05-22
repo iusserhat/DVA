@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import registerBg from '../assets/register.svg';
+// Merkezi Supabase bağlantısını kullan
+import supabase from "../utils/supabaseClient";
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -11,6 +13,10 @@ const RegisterPage = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const navigate = useNavigate();
 
   // Sayfa düzenlemeleri için useEffect
   useEffect(() => {
@@ -47,9 +53,66 @@ const RegisterPage = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Kayıt yapılıyor:", formData);
+    setError("");
+    setLoading(true);
+    
+    try {
+      console.log("Kayıt yapılıyor:", { fullName: formData.fullName, email: formData.email });
+      
+      // Email doğrulama olmadan kayıt
+      const { data, error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            name: formData.fullName,
+            phone: formData.phone
+          },
+          emailRedirectTo: window.location.origin,
+          // E-posta doğrulama gereksinimi kaldırıldı
+        }
+      });
+      
+      if (error) {
+        console.error("Kayıt hatası:", error);
+        setError(error.message || 'Kayıt işlemi başarısız. Lütfen tekrar deneyiniz.');
+        return;
+      }
+      
+      console.log("Kayıt başarılı:", data);
+      
+      // Kullanıcıyı otomatik olarak giriş yap
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password
+      });
+      
+      if (signInError) {
+        console.error("Otomatik giriş hatası:", signInError);
+        setSuccessMessage(
+          "Kayıt işlemi başarılı! Ancak otomatik giriş yapılamadı. Lütfen giriş sayfasına gidin."
+        );
+      } else {
+        // Oturum bilgilerini kaydet
+        localStorage.setItem('token', signInData.session.access_token);
+        localStorage.setItem('user', JSON.stringify(signInData.user));
+        
+        setSuccessMessage("Kayıt ve giriş başarılı! Yönlendiriliyorsunuz...");
+      }
+      
+      // 3 saniye sonra ana sayfaya yönlendir
+      setTimeout(() => {
+        navigate('/home');
+      }, 3000);
+      
+    } catch (err) {
+      console.error("Kayıt işlemi sırasında hata:", err);
+      setError("Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Mobil cihaz kontrolü

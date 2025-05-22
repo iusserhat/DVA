@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import loginSvg from "../assets/login.svg";
+// Merkezi Supabase bağlantısını kullan
+import supabase from "../utils/supabaseClient";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   // Sayfa düzenlemeleri için useEffect
@@ -61,13 +65,57 @@ const LoginPage = () => {
     };
   }, []);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Giriş yapılıyor:", { email, password });
+    setError("");
+    setLoading(true);
     
-    // Giriş işlemi burada yapılacak
-    // Başarılı giriş durumunda ana sayfaya yönlendir
-    navigate("/home");
+    console.log("Giriş yapılıyor:", { email, passwordLength: password ? password.length : 0 });
+    
+    try {
+      // Rate limit sorununu önlemek için 1 saniyelik gecikme ekle
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Supabase ile giriş yap
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      if (error) {
+        console.error("Supabase giriş hatası:", error);
+        
+        // Özel hata mesajları
+        if (error.message === 'Email not confirmed') {
+          setError('E-posta adresiniz henüz onaylanmamış. Lütfen e-postanızı kontrol edin.');
+        } else if (error.message.includes('Invalid login credentials')) {
+          setError('Geçersiz e-posta veya şifre. Lütfen bilgilerinizi kontrol edin.');
+        } else if (error.message.includes('rate limit')) {
+          setError('Çok fazla giriş denemesi yaptınız. Lütfen biraz bekleyip tekrar deneyin.');
+        } else {
+          setError('Giriş yapılırken bir hata oluştu: ' + error.message);
+        }
+        return;
+      }
+      
+      if (data?.session) {
+        console.log("Giriş başarılı");
+        
+        // Token ve kullanıcı verisini kaydet
+        localStorage.setItem('token', data.session.access_token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        
+        // Ana sayfaya yönlendir
+        navigate("/home");
+      } else {
+        setError('Kullanıcı bilgileri alınamadı.');
+      }
+    } catch (err) {
+      console.error("Beklenmeyen hata:", err);
+      setError("Giriş sırasında bir hata oluştu. Lütfen tekrar deneyin.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Responsive form genişliği
@@ -263,11 +311,28 @@ const LoginPage = () => {
               borderRadius: "5px",
               fontSize: windowWidth <= 480 ? "14px" : "16px", // Mobil için font boyutunu azalt
               fontWeight: "bold",
-              cursor: "pointer"
+              cursor: loading ? "not-allowed" : "pointer",
+              opacity: loading ? 0.7 : 1
             }}
+            disabled={loading}
           >
-            Giriş Yap
+            {loading ? "Giriş Yapılıyor..." : "Giriş Yap"}
           </button>
+          
+          {error && (
+            <div style={{
+              color: "#D71923",
+              textAlign: "center",
+              marginTop: "15px",
+              fontSize: windowWidth <= 480 ? "12px" : "14px",
+              padding: "10px",
+              backgroundColor: "#ffebee",
+              borderRadius: "5px",
+              border: "1px solid #ffcdd2"
+            }}>
+              {error}
+            </div>
+          )}
         </form>
       </div>
     </div>

@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { visaApplicationApi, fileUploadApi, authApi } from '../services/api';
 
 const VisaApplicationForm = () => {
   const [formData, setFormData] = useState({
@@ -158,11 +159,133 @@ const VisaApplicationForm = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
-    // Form gönderme işlemi burada yapılacak
-    alert('Başvurunuz alındı!');
+    
+    try {
+      // Kullanıcı giriş yapmış mı kontrol et
+      const currentUser = authApi.getCurrentUser();
+      if (!currentUser) {
+        alert('Başvuru yapmak için önce giriş yapmalısınız.');
+        return;
+      }
+
+      // Dosyaları yükle ve URL'leri al
+      let fileUrls = {};
+      
+      if (formData.passport) {
+        const passportUpload = await fileUploadApi.uploadFile(formData.passport, 'passport');
+        if (passportUpload.success) {
+          fileUrls.passportUrl = passportUpload.data.url;
+        } else {
+          alert('Pasaport yüklenirken hata oluştu: ' + passportUpload.error);
+          return;
+        }
+      }
+      
+      if (formData.photo) {
+        const photoUpload = await fileUploadApi.uploadFile(formData.photo, 'photo');
+        if (photoUpload.success) {
+          fileUrls.photoUrl = photoUpload.data.url;
+        } else {
+          alert('Fotoğraf yüklenirken hata oluştu: ' + photoUpload.error);
+          return;
+        }
+      }
+      
+      if (formData.flightTicket) {
+        const ticketUpload = await fileUploadApi.uploadFile(formData.flightTicket, 'flight_ticket');
+        if (ticketUpload.success) {
+          fileUrls.flightTicketUrl = ticketUpload.data.url;
+        }
+      }
+      
+      if (formData.hotelReservation) {
+        const hotelUpload = await fileUploadApi.uploadFile(formData.hotelReservation, 'hotel_reservation');
+        if (hotelUpload.success) {
+          fileUrls.hotelReservationUrl = hotelUpload.data.url;
+        }
+      }
+      
+      if (formData.otherDocument) {
+        const otherUpload = await fileUploadApi.uploadFile(formData.otherDocument, 'other');
+        if (otherUpload.success) {
+          fileUrls.otherDocumentUrl = otherUpload.data.url;
+        }
+      }
+      
+      // Başvuru verilerini oluştur (user_id frontend'den gönderilmez, token'dan alınır)
+      const applicationData = {
+        fullName: formData.fullName,
+        identityNumber: formData.identityNumber,
+        phoneNumber: formData.phoneNumber,
+        email: formData.email,
+        applicationType: formData.applicationType,
+        visaType: formData.visaType,
+        expressApplication: formData.expressApplication === 'yes',
+        insurance: formData.insurance === 'yes',
+        usageType: formData.usageType || 'individual',
+        paymentType: formData.paymentType,
+        paymentAmount: parseFloat(formData.paymentAmount) || 0,
+        paymentBy: formData.paymentBy,
+        ...fileUrls
+      };
+      
+      // Başvuruyu kaydet
+      const result = await visaApplicationApi.createApplication(applicationData);
+      
+      if (result.success) {
+        alert('Başvurunuz başarıyla kaydedildi!');
+        // Başvurular sekmesine geç
+        setActiveTab('applications');
+        
+        // Yeni başvuruyu listeye ekle
+        const newApplication = {
+          id: result.data.id,
+          applicationDate: new Date().toLocaleDateString('tr-TR'),
+          fullName: formData.fullName,
+          visaType: formData.visaType === '30' ? 'Turistik vize (30 gün)' : 'Turistik vize (90 gün)',
+          applicationType: formData.visaType === '30' ? '30 Gün Tek Giriş' : '90 Gün Çok Giriş',
+          express: formData.expressApplication === 'yes' ? 'Evet' : 'Hayır',
+          insurance: formData.insurance === 'yes' ? 'Evet' : 'Hayır',
+          fee: `${formData.paymentAmount || 0}₺`,
+          invoice: 'Hazırlanıyor',
+          status: 'İşlemde'
+        };
+        
+        setApplications([newApplication, ...applications]);
+        
+        // Formu sıfırla
+        setFormData({
+          fullName: '',
+          identityNumber: '',
+          phoneNumber: '',
+          email: '',
+          applicationType: '',
+          visaType: '',
+          expressApplication: '',
+          insurance: '',
+          usageType: '',
+          country: '',
+          city: '',
+          district: '',
+          passport: null,
+          photo: null,
+          flightTicket: null,
+          hotelReservation: null,
+          otherDocument: null,
+          paymentType: '',
+          paymentAmount: '',
+          paymentBy: ''
+        });
+      } else {
+        alert('Başvuru kaydedilirken bir hata oluştu: ' + result.error);
+      }
+    } catch (error) {
+      console.error('Başvuru gönderilirken hata:', error);
+      const errorMessage = error.response?.data?.error || 'Başvuru işlemi sırasında bir hata oluştu.';
+      alert(errorMessage);
+    }
   };
 
   // Başvuru detayını görüntüleme fonksiyonu
