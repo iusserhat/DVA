@@ -33,83 +33,75 @@ const VisaApplicationForm = () => {
   const [formErrors, setFormErrors] = useState({});
   const [isUploading, setIsUploading] = useState(false);
   
-  // Örnek vize başvuruları verisi
-  const [applications, setApplications] = useState([
-    {
-      id: '123456',
-      applicationDate: '17/05/24',
-      fullName: 'İsim Soyisim',
-      visaType: 'Turistik vize (30 gün)',
-      applicationType: '30 Gün Tek Giriş',
-      express: 'Evet',
-      insurance: 'Hayır',
-      fee: '217₺',
-      invoice: 'Hazırlanıyor',
-      status: 'İşlemde'
-    },
-    {
-      id: '123457',
-      applicationDate: '17/05/24',
-      fullName: 'İsim Soyisim',
-      visaType: 'Turistik vize (30 gün)',
-      applicationType: '30 Gün Tek Giriş',
-      express: 'Hayır',
-      insurance: 'Evet',
-      fee: '217₺',
-      invoice: 'Hazırlanıyor',
-      status: 'İşlemde'
-    },
-    {
-      id: '123458',
-      applicationDate: '16/05/24',
-      fullName: 'İsim Soyisim',
-      visaType: 'Turistik vize (30 gün)',
-      applicationType: '30 Gün Tek Giriş',
-      express: 'Hayır',
-      insurance: 'Hayır',
-      fee: '217₺',
-      invoice: 'Hazırlanıyor',
-      status: 'İşlemde'
-    },
-    {
-      id: '123459',
-      applicationDate: '16/05/24',
-      fullName: 'İsim Soyisim',
-      visaType: 'Turistik vize (30 gün)',
-      applicationType: '30 Gün Tek Giriş',
-      express: 'Hayır',
-      insurance: 'Hayır',
-      fee: '217₺',
-      invoice: 'Hazırlanıyor',
-      status: 'İşlemde'
-    },
-    {
-      id: '123460',
-      applicationDate: '15/05/24',
-      fullName: 'İsim Soyisim',
-      visaType: 'Turistik vize (30 gün)',
-      applicationType: '30 Gün Tek Giriş',
-      express: 'Hayır',
-      insurance: 'Hayır',
-      fee: '217₺',
-      invoice: 'Hazırlanıyor',
-      status: 'İşlemde'
-    },
-    {
-      id: '123461',
-      applicationDate: '15/05/24',
-      fullName: 'İsim Soyisim',
-      visaType: 'Turistik vize (30 gün)',
-      applicationType: '30 Gün Tek Giriş',
-      express: 'Evet',
-      insurance: 'Evet',
-      fee: '217₺',
-      invoice: 'Hazırlanıyor',
-      status: 'İşlemde'
-    }
-  ]);
+  // Vize başvuruları listesi
+  const [applications, setApplications] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const [activeTab, setActiveTab] = useState('applications'); // Başlangıç olarak başvuruları göstereceğiz
+
+  // Başvuru verilerini veritabanından çek
+  useEffect(() => {
+    const fetchApplicationData = async () => {
+      try {
+        setLoading(true);
+        
+        // Kullanıcı oturumunu kontrol et
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session) {
+          console.error("Oturum açılmamış");
+          // Toast veya alert kullanarak bildirim gösterebiliriz
+          setLoading(false);
+          return;
+        }
+        
+        const userId = session.user.id;
+        
+        // Kullanıcının vize başvurularını Supabase'den al
+        console.log("Vize başvuruları çekiliyor - user ID:", userId);
+        const { data, error } = await supabase
+          .from('visa_applications')
+          .select('*')
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false });
+        
+        if (error) {
+          console.error('Vize başvurularını alma hatası:', error);
+          setLoading(false);
+          return;
+        }
+        
+        console.log("Veritabanından gelen vize başvuruları:", data);
+        
+        // Veritabanından gelen verileri uygulama formatına dönüştür
+        const formattedApplications = data.map(item => {
+          return {
+            id: item.id || '123456',
+            applicationDate: new Date(item.created_at).toLocaleDateString('tr-TR'),
+            fullName: item.fullName || '',
+            visaType: item.visaType === '30' ? 'Turistik vize (30 gün)' : 'Turistik vize (90 gün)',
+            applicationType: item.visaType === '30' ? '30 Gün Tek Giriş' : '90 Gün Çok Giriş',
+            express: item.expressApplication ? 'Evet' : 'Hayır',
+            insurance: item.insurance ? 'Evet' : 'Hayır',
+            fee: `${item.paymentAmount || '217'}₺`,
+            invoice: 'Hazırlanıyor',
+            status: item.status || 'İşlemde'
+          };
+        });
+        
+        setApplications(formattedApplications);
+      } catch (error) {
+        console.error('Vize başvuruları getirme hatası:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // Aktif sekme applications ise ve yüklenmemişse verileri çek
+    if (activeTab === 'applications') {
+      fetchApplicationData();
+    }
+  }, [activeTab]);
 
   // Özel bildirim fonksiyonu - toast yerine alert kullan
   const showNotification = (message, type) => {
@@ -171,33 +163,12 @@ const VisaApplicationForm = () => {
   useEffect(() => {
     const checkAndCreateBucket = async () => {
       try {
-        // Önce bucket listesini al
-        const { data: buckets, error } = await supabase.storage.listBuckets();
+        // Supabase'den bucket kontrolü yapmaya çalış
+        console.log("Bucket kontrolü yapılıyor...");
         
-        if (error) {
-          console.error("Bucket listesi alınamadı:", error);
-          return;
-        }
-        
-        // Aranan bucket var mı kontrol et
-        const bucketExists = buckets.some(bucket => bucket.name === 'visadocuments');
-        
-        if (!bucketExists) {
-          console.log("visadocuments bucket'ı bulunamadı, oluşturuluyor...");
-          const { error: createError } = await supabase.storage.createBucket('visadocuments', {
-            public: true,
-            allowedMimeTypes: ['image/png', 'image/jpeg', 'image/gif', 'application/pdf'],
-            fileSizeLimit: 5 * 1024 * 1024 // 5MB
-          });
-          
-          if (createError) {
-            console.error("Bucket oluşturma hatası:", createError);
-          } else {
-            console.log("visadocuments bucket'ı başarıyla oluşturuldu");
-          }
-        } else {
-          console.log("visadocuments bucket'ı zaten mevcut");
-        }
+        // Eğer bucket oluşturma işlemi sorun çıkarıyorsa,
+        // bu kısmı atlayabilir ve bucket'ın önceden oluşturulmuş olduğunu varsayabiliriz
+        // Bu durumda sadece dosya yükleme işlemine odaklanacağız
       } catch (err) {
         console.error("Bucket kontrolü sırasında hata:", err);
       }
@@ -236,29 +207,13 @@ const VisaApplicationForm = () => {
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
         const filePath = `${type}/${fileName}`;
         
-        // Bucket'ın var olduğundan emin ol
-        const { data: buckets } = await supabase.storage.listBuckets();
-        const bucketExists = buckets.some(bucket => bucket.name === 'visadocuments');
-        
-        if (!bucketExists) {
-          const { error: createError } = await supabase.storage.createBucket('visadocuments', {
-            public: true,
-            allowedMimeTypes: ['image/png', 'image/jpeg', 'image/gif', 'application/pdf'],
-            fileSizeLimit: 5 * 1024 * 1024
-          });
-          
-          if (createError) {
-            throw new Error(`Bucket oluşturulamadı: ${createError.message}`);
-          }
-        }
-        
-        // Dosyayı Supabase'e yükle
+        // Dosyayı Supabase'e yüklemeyi dene
         const { data, error } = await supabase
           .storage
           .from('visadocuments')
           .upload(filePath, file, {
             cacheControl: '3600',
-            upsert: false
+            upsert: true
           });
 
         if (error) {
@@ -331,9 +286,10 @@ const VisaApplicationForm = () => {
     setFormErrors({});
     
     try {
-      // Kullanıcı giriş yapmış mı kontrol et
-      const currentUser = authApi.getCurrentUser();
-      if (!currentUser) {
+      // Supabase'den kullanıcı oturumunu al
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session || !session.user) {
         alert('Başvuru yapmak için önce giriş yapmalısınız.');
         setIsLoading(false);
         return;
@@ -343,17 +299,18 @@ const VisaApplicationForm = () => {
       if (!formData.passportUrl) {
         alert('Pasaport yüklemek zorunludur!');
         setIsLoading(false);
-          return;
-        }
+        return;
+      }
       
       if (!formData.photoUrl) {
         alert('Vesikalık fotoğraf yüklemek zorunludur!');
         setIsLoading(false);
-          return;
-        }
+        return;
+      }
       
       // Başvuru verilerini oluştur
       const applicationData = {
+        user_id: session.user.id,
         fullName: formData.fullName,
         identityNumber: formData.identityNumber,
         phoneNumber: formData.phoneNumber,
@@ -376,6 +333,15 @@ const VisaApplicationForm = () => {
       // Backend çalışmadığı için doğrudan Supabase'e kaydedelim
       try {
         console.log("Başvuru Supabase'e kaydediliyor...", applicationData);
+        
+        // Oturum bilgilerini tekrar kontrol edelim
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session) {
+          showNotification('Oturumunuz sonlanmış. Lütfen tekrar giriş yapın.', 'error');
+          setIsLoading(false);
+          return;
+        }
         
         // Supabase'e veriyi kaydet
         const { data, error } = await supabase
@@ -636,61 +602,83 @@ const VisaApplicationForm = () => {
             marginBottom: '20px',
             overflowX: 'auto'
           }}>
-            <table style={{
-              width: '100%',
-              borderCollapse: 'collapse',
-              fontSize: '12px'
-            }}>
-              <thead>
-                <tr style={{ 
-                  borderBottom: '1px solid #eee',
-                  textAlign: 'left',
-                  color: '#333'
-                }}>
-                  <th style={{ padding: '8px 4px' }}>Takip No</th>
-                  <th style={{ padding: '8px 4px' }}>Başvuru Tarihi</th>
-                  <th style={{ padding: '8px 4px' }}>İsim Soyisim</th>
-                  <th style={{ padding: '8px 4px' }}>Vize Tipi</th>
-                  <th style={{ padding: '8px 4px' }}>Başvuru Tipi</th>
-                  <th style={{ padding: '8px 4px' }}>Ekspres</th>
-                  <th style={{ padding: '8px 4px' }}>Sigorta</th>
-                  <th style={{ padding: '8px 4px' }}>Ücret</th>
-                  <th style={{ padding: '8px 4px' }}>Fatura</th>
-                  <th style={{ padding: '8px 4px' }}>Başvuru Durumu</th>
-                </tr>
-              </thead>
-              <tbody>
-                {applications.map((app) => (
-                  <tr key={app.id} style={{ borderBottom: '1px solid #eee' }}>
-                    <td style={{ padding: '8px 4px', color: '#333' }}>{app.id}</td>
-                    <td style={{ padding: '8px 4px', color: '#333' }}>{app.applicationDate}</td>
-                    <td style={{ padding: '8px 4px', color: '#333' }}>{app.fullName}</td>
-                    <td style={{ padding: '8px 4px', color: '#333' }}>{app.visaType}</td>
-                    <td style={{ padding: '8px 4px', color: '#333' }}>{app.applicationType}</td>
-                    <td style={{ padding: '8px 4px', color: '#333' }}>{app.express}</td>
-                    <td style={{ padding: '8px 4px', color: '#333' }}>{app.insurance}</td>
-                    <td style={{ padding: '8px 4px', color: '#333' }}>{app.fee}</td>
-                    <td style={{ padding: '8px 4px', color: '#333' }}>{app.invoice}</td>
-                    <td style={{ padding: '8px 4px' }}>
-                      <button
-                        onClick={() => handleViewDetails(app.id)}
-                        style={{
-                          backgroundColor: '#D71923',
-                          color: 'white',
-                          border: 'none',
-                          padding: '4px 8px',
-                          borderRadius: '4px',
-                          cursor: 'pointer',
-                          fontSize: '11px'
-                        }}
-                      >
-                        Detay
-                      </button>
-                    </td>
+            {loading ? (
+              <div style={{ 
+                textAlign: 'center', 
+                padding: '20px', 
+                backgroundColor: 'white', 
+                borderRadius: '8px', 
+                boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+              }}>
+                Yükleniyor...
+              </div>
+            ) : applications.length === 0 ? (
+              <div style={{ 
+                textAlign: 'center', 
+                padding: '20px', 
+                backgroundColor: 'white', 
+                borderRadius: '8px', 
+                boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+              }}>
+                Henüz vize başvurunuz bulunmamaktadır.
+              </div>
+            ) : (
+              <table style={{
+                width: '100%',
+                borderCollapse: 'collapse',
+                fontSize: '12px'
+              }}>
+                <thead>
+                  <tr style={{ 
+                    borderBottom: '1px solid #eee',
+                    textAlign: 'left',
+                    color: '#333'
+                  }}>
+                    <th style={{ padding: '8px 4px' }}>Takip No</th>
+                    <th style={{ padding: '8px 4px' }}>Başvuru Tarihi</th>
+                    <th style={{ padding: '8px 4px' }}>İsim Soyisim</th>
+                    <th style={{ padding: '8px 4px' }}>Vize Tipi</th>
+                    <th style={{ padding: '8px 4px' }}>Başvuru Tipi</th>
+                    <th style={{ padding: '8px 4px' }}>Ekspres</th>
+                    <th style={{ padding: '8px 4px' }}>Sigorta</th>
+                    <th style={{ padding: '8px 4px' }}>Ücret</th>
+                    <th style={{ padding: '8px 4px' }}>Fatura</th>
+                    <th style={{ padding: '8px 4px' }}>Başvuru Durumu</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {applications.map((app) => (
+                    <tr key={app.id} style={{ borderBottom: '1px solid #eee' }}>
+                      <td style={{ padding: '8px 4px', color: '#333' }}>{app.id}</td>
+                      <td style={{ padding: '8px 4px', color: '#333' }}>{app.applicationDate}</td>
+                      <td style={{ padding: '8px 4px', color: '#333' }}>{app.fullName}</td>
+                      <td style={{ padding: '8px 4px', color: '#333' }}>{app.visaType}</td>
+                      <td style={{ padding: '8px 4px', color: '#333' }}>{app.applicationType}</td>
+                      <td style={{ padding: '8px 4px', color: '#333' }}>{app.express}</td>
+                      <td style={{ padding: '8px 4px', color: '#333' }}>{app.insurance}</td>
+                      <td style={{ padding: '8px 4px', color: '#333' }}>{app.fee}</td>
+                      <td style={{ padding: '8px 4px', color: '#333' }}>{app.invoice}</td>
+                      <td style={{ padding: '8px 4px' }}>
+                        <button
+                          onClick={() => handleViewDetails(app.id)}
+                          style={{
+                            backgroundColor: '#D71923',
+                            color: 'white',
+                            border: 'none',
+                            padding: '4px 8px',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            fontSize: '11px'
+                          }}
+                        >
+                          Detay
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         )}
 

@@ -62,9 +62,13 @@ const visaModel = {
   // Tüm vize başvurularını getir (admin için)
   getAllVisaApplications: async () => {
     try {
+      // Inner join yerine left join kullanarak users tablosuyla birleştirme
       const { data, error } = await supabase
         .from('visa_applications')
-        .select('*, users!inner(*)')
+        .select(`
+          *,
+          users:user_id(*)
+        `)
         .order('application_date', { ascending: false });
       
       if (error) {
